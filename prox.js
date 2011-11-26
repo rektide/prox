@@ -1,5 +1,8 @@
 function handlerMaker(obj) {
+	var prox = {
+	}
 	return {
+		prox: prox,
 		getOwnPropertyDescriptor: function(name) {
 			var desc = Object.getOwnPropertyDescriptor(obj, name);
 			// a trapping proxy's properties must always be configurable
@@ -47,10 +50,11 @@ function handlerMaker(obj) {
 }
 //var proxy = Proxy.create(handlerMaker(obj));
 
-function doOrMake(fn) {
-	return function(a1){
-		fn(a1||{})
-	}	
+function doOrMake(a) {
+	var handler = handleMaker(a||{})
+	var proxied = Proxy.create(handler)
+	proxied._prox = handler.prox // TODO: plugin that creates this exposure
+	return proxied
 }
 
 
