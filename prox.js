@@ -1,30 +1,64 @@
+var cc= require("cc")
+
 function handlerMaker(obj) {
+	// build a chain runner
+	function runner(default)
+	{
+		var chain= cc(arguments)
+		return function(){
+			var result = chain.execute({args:arguments,undefinedOnlyNonReturn:true})
+			return result
+		}
+	}
+	function completer(ctx)
+	{
+		if(ctx.result)
+			return ctx.result
+		return undefined
+	}
+	
 	var prox = {
 	}
-	return {
-		prox: prox,
-		getOwnPropertyDescriptor: function(name) {
-			var desc = Object.getOwnPropertyDescriptor(obj, name);
+
+	return function prox(obj) {
+		obj= obj||{}
+		this.prox= prox
+
+		function transparentGetOwnPropertyDescriptor(ctx) {
+			var name= args[0],
+			  desc = Object.getOwnPropertyDescriptor(obj, name)
 			// a trapping proxy's properties must always be configurable
 			if (desc !== undefined) { desc.configurable = true; }
-			return desc;
-		},
-		getPropertyDescriptor: function(name) {
-			var desc = Object.getPropertyDescriptor(obj, name); // not in ES5
+			ctx.result= desc
+			return false
+		}
+		this.getOwnPropertyDescriptor= runner([transparentGetOwnPropertyDescriptor,completer])
+		
+		function transparentGetPropertyDescriptor(ctx) {
+			var name= args[0],
+			  desc = Object.getPropertyDescriptor(obj, name) // not in ES5
 			// a trapping proxy's properties must always be configurable
 			if (desc !== undefined) { desc.configurable = true; }
-			return desc;
-		},
-		getOwnPropertyNames: function() {
+			ctx.result= desc
+			return desc
+		}
+		this.getPropertyDescriptor= runner([transparentGetPropertyDescriptor,completer])
+
+		function transparentGetOwnPropertyNames() {
 			return Object.getOwnPropertyNames(obj);
-		},
+		}
+		this.getOwnPropertyNames= runner([transparentGetOwnPropertyNames,completer])
+
+
 		getPropertyNames: function() {
 			return Object.getPropertyNames(obj);                // not in ES5
 		},
 		defineProperty: function(name, desc) {
 			Object.defineProperty(obj, name, desc);
 		},
-		delete:     function(name) { return delete obj[name]; },   
+		delete:     function(name) { 
+			return delete obj[name]; 
+		},   
 		fix:        function() {
 			if (Object.isFrozen(obj)) {
 			var result = {};
@@ -46,7 +80,7 @@ function handlerMaker(obj) {
 				return result;
 		},
 		keys: function() { return Object.keys(obj); }
-	};
+	}();
 }
 //var proxy = Proxy.create(handlerMaker(obj));
 
