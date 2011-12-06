@@ -9,8 +9,8 @@ function runner(obj,filter)
 {
 	filter.filter= completerFilter
 	var chain= cc(filter,{undefinedOnlyNonReturnable:true})
-	return function(){
-		var result= chain.execute(obj,{args:arguments,obj:obj})
+	return function() {
+		var result= chain.execute({args:arguments,obj:obj})
 		if(result)
 			return result.result
 	}
