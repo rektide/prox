@@ -1,7 +1,7 @@
 if(typeof exports === undefined)
-	exports = {}
+	exports= {}
 
-var proxPlugin = exports.proxPlugin = function(handler,opts) {
+var prox= exports.enhance= exports.prox= function(handler,opts) {
 	opts= opts||{}
 	var chains= handler._chains,
 	  paranoid= opts.beParanoid,

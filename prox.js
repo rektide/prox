@@ -1,5 +1,5 @@
 var cc= require("cc"),
-  proxPlugin= require("./plugin/prox")
+  proxPlugin= require("./plugin/prox").enhance
 
 
 function completerFilter(ctx)
