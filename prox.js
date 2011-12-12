@@ -1,4 +1,5 @@
-var cc= require("cc")
+var cc= require("cc"),
+  proxPlugin= require("./plugin/prox")
 
 
 function completerFilter(ctx)
@@ -88,8 +89,9 @@ function handlerMaker(obj,args) {
 
 function doOrMake(a) {
 	var handler= handleMaker(a||{})
+	proxPlugin(handler)
 	var proxied= Proxy.create(handler)
-	proxied._prox= handler.prox // TODO: plugin that creates this exposure
+	//proxied._prox= handler.prox // TODO: plugin that creates this exposure
 	return proxied
 }
 
