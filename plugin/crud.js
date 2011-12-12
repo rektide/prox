@@ -56,3 +56,4 @@ var crud= exports.enhance= exports.crud= function(o,opts) {
 	meta(o,"_crud",{evt:evt},opts)
 	return evt
 }
+crud.name= "crud"

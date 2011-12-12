@@ -53,7 +53,7 @@ var proxEnhance= exports.proxEnhance= function(o,opts) {
 			var old= includes[name]
 			includes[name]= enhancer
 			if(!old && enhancer)
-				enhancer(o,opts)
+				enhancer.call(this,o,opts)
 		}
 	}
 	enhance.opts= opts

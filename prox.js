@@ -101,13 +101,11 @@ function doOrMake(a) {
 
 /*
 module prox {
-	export var mkprox= doOrMake(handleMaker); }
+	export var mkprox= doOrMake(handleMaker) }
 */
 
-/*
-exports.mkprox= doOrMake(handleMaker);
-*/
 
+exports.prox= doOrMake(handleMaker)
 
 
 
