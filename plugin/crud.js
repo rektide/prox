@@ -51,5 +51,7 @@ var crud= exports.enhance= exports.crud= function(o,opts) {
 			})
 
 	}
+
+	enhance(o,{evt:evt},"_crud",opts)
 	return evt
 }
