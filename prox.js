@@ -5,14 +5,13 @@ function completerFilter(ctx)
 	{return ctx ? ctx.result : undefined}
 
 // build a chain runner
-function runner(obj,filter)
+function runner(name,obj,filter)
 {
 	filter.filter= completerFilter
-	var chain= cc(filter,{undefinedOnlyNonReturnable:true})
+	var chain= cc(filter,{name:name,undefinedOnlyNonReturnable:true})
 	return function() {
-		var result= chain.execute({args:arguments,obj:obj})
-		if(result)
-			return result.result
+		var ctx = {args:arguments,obj:obj}
+		return chain.execute(ctx)
 	}
 }
 
@@ -52,9 +51,9 @@ var defaultChains= {
 		// As long as obj is not frozen, the proxy won't allow itself to be fixed
 		// will cause a TypeError to be thrown
 	},
-	has: function(name) {var name= ctx.args[0]
+	has: function(ctx) {var name= ctx.args[0]
 		ctx.result= name in ctx.obj},
-	hasOwn: function(name) {var name= ctx.args[0]
+	hasOwn: function(ctx) {var name= ctx.args[0]
 		ctx.result= ({}).hasOwnProperty.call(ctx.obj, name)},
 	get: function(ctx) {var receiver= ctx.args[0], name= ctx.args[1]
 		ctx.result= obj[name]
@@ -80,7 +79,7 @@ function handlerMaker(obj,args) {
 		for(var i in defaultChains) {
 			var chain= defaultChains[i]
 			chains[i]= chain
-			this[i]= runner(obj,chain)
+			this[i]= runner(i,obj,chain)
 		}
 		return this
 	}(obj||{});
