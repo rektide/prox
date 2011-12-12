@@ -1,5 +1,5 @@
 var cc= require("cc"),
-  proxPlugin= require("./plugin/prox").enhance
+  proxPlugin= require("./plugin/prox").enhanceHandler
 
 
 function completerFilter(ctx)
@@ -89,9 +89,12 @@ function handlerMaker(obj,args) {
 
 function doOrMake(a) {
 	var handler= handleMaker(a||{})
-	proxPlugin(handler)
 	var proxied= Proxy.create(handler)
-	//proxied._prox= handler.prox // TODO: plugin that creates this exposure
+
+	proxChain(proxied,handler._chains)
+	proxObj(proxied,handler._obj)
+	proxEnhance(proxied,{chain:proxChain,obj:proxObj,enhance:proxEnhance})
+
 	return proxied
 }
 

@@ -1,26 +1,20 @@
+var meta= require("./enhance").meta
+
 if(typeof exports === undefined)
 	exports= {}
 
-var prox= exports.enhance= exports.prox= function(handler,opts) {
+/**
+ * Adds an _obj metaproperty that exposes the underlying object directly.
+ */
+var proxObj= exports.proxObj= function(o,obj,opts) {
+	meta(o,"_obj",obj,opts)
+}
+
+/**
+ * Add a _chain metaproperty that exposes the underlying CC's.
+ */
+var proxChain= exports.proxChain= function(o,chains,opts) {	
 	opts= opts||{}
-	var chains= handler._chains,
-	  paranoid= opts.beParanoid,
-	  meta= opts.name||"_chain"
-	chains.getPropertyDescriptor.chain.push(function(ctx){var name= ctx.args[0]
-		if(name == meta) {
-			// TODO: ctx.results = ??
-		}
-	})
-	chains.getPropertyNames.chain.push(function(ctx){
-		if(!paranoid || ctx.results.indexOf(meta) == -1)
-			ctx.results.push(meta)
-	})
-	chains.has.chain.push(function(ctx){var name= ctx.args[0]
-		if(name == meta)
-			ctx.results= true
-	})
-	chains.get.chain.push(function(ctx){var name= ctx.args[0]
-		if(name == meta)
-			return chains
-	})
+	opts.chains= chains
+	meta(o,"_chains",chains,opts)
 }

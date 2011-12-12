@@ -1,17 +1,17 @@
 if(typeof exports === undefined)
 	exports= {}
 
+
 /**
- * Enhance is a prototype for adding "meta" properties to an object. Plugins that want
+ * A prototype for adding "meta" properties to an object. Plugins that want
  *  to expose themselves should consider using this.
- * @name enhance
- * @param target the object which is to be extended
- * @param extension the extension to add to the object
- * @param name the meta-name for the extension
+ * @param o the object which is to be extended
+ * @param meta the name of the extension to add to the object
+ * @param ext the extension added
  */
-var prox= exports.enhance= exports.enhancePlugin= function(target,extension,name,opts) {
+var meta= exports.meta= function(o,meta,ext,opts) {
 	opts= opts||{}
-	var chains= target._chains,
+	var chains= o._chains||opts.chains,
 	  paranoid= opts.beParanoid
 	chains.getPropertyDescriptor.chain.push(function(ctx){var cname= ctx.args[0]
 		if(cname == meta) {
@@ -31,6 +31,39 @@ var prox= exports.enhance= exports.enhancePlugin= function(target,extension,name
 	})
 	chains.get.chain.push(function(ctx){var cname= ctx.args[0]
 		if(cname == meta)
-			ctx.result= extension
+			ctx.result= ext
 	})
+}
+
+/**
+ * add a _enhance function for adding enhancements
+ */
+var proxEnhance= exports.proxEnhance= function(o,opts) {
+	opts= opts||{}
+	var chains= handler._chains,
+	  includes= opts.includes||{},
+	  excludes= opts.excludes||[],
+
+	function enhance(name,enhancer){
+		if(typeof name == "function" && name.name){ //unpack
+			enhancer= name
+			name= enhancer.name
+		}
+		if(enhancer == null||excludes.indexOf(enhancer)==-1){
+			var old= includes[name]
+			includes[name]= enhancer
+			if(!old && enhancer)
+				enhancer(o,opts)
+		}
+	}
+	enhance.opts= opts
+	enhance.includes= includes
+	enhance.excludes= excludes
+	enhance.bless= function bless(o) {
+		for(var i in includes) {
+			o._enhance(i,includes[i])
+		}
+	}
+
+	meta(o,"_enhance",enhance,opts)
 }

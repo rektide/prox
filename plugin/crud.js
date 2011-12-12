@@ -1,4 +1,5 @@
-var eventEmitter= require("events").EventEmitter
+var eventEmitter= require("events").EventEmitter,
+  meta= require("./enhance").meta
 
 if(typeof exports === undefined)
 	exports= {}
@@ -52,6 +53,6 @@ var crud= exports.enhance= exports.crud= function(o,opts) {
 
 	}
 
-	enhance(o,{evt:evt},"_crud",opts)
+	meta(o,"_crud",{evt:evt},opts)
 	return evt
 }
