@@ -1,0 +1,33 @@
+{
+	"name": "prox",
+	"version": "1.0.0",
+	"description": "_meta object system in javascript",
+	"main": "prox.js",
+	"directories": {
+		"test": "test"
+	},
+	"dependencies": {
+	},
+	"devDependencies": {
+		"chai": "~1.7.0",
+		"chai-as-promised": "~3.3.1",
+		"mocha": "~1.11.0",
+		"mocha-as-promised": "~1.4.0",
+		"q": "~0.9.6",
+		"q-io": "~1.7.1"
+	},
+	"scripts": {
+		"test": "mocha"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/rektide/prox.git"
+	},
+	"author": "rektide",
+	"license": "MIT/X",
+	"readmeFilename": "README.md",
+	"gitHead": "4e8e121a7bcfb3c7febb108a391f660ba376781d",
+	"bugs": {
+		"url": "https://github.com/rektide/prox/issues"
+	}
+}
