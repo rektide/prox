@@ -31,8 +31,9 @@ var meta= exports.meta= function(o,meta,ext,opts) {
 			ctx.results= true
 	})
 	chains.get.chain.push(function(ctx){var cname= ctx.args[1];
-		if(cname == meta)
+		if(cname == meta){
 			ctx.result= ext
+		}
 	})
 }
 
@@ -41,7 +42,7 @@ var meta= exports.meta= function(o,meta,ext,opts) {
  */
 var proxEnhance= exports.proxEnhance= function(o,opts) {
 	opts= opts||{}
-	var chains= handler._chains,
+	var chains= o._chains,
 	  includes= opts.includes||{},
 	  excludes= opts.excludes||[]
 
@@ -61,8 +62,8 @@ var proxEnhance= exports.proxEnhance= function(o,opts) {
 	enhance.includes= includes
 	enhance.excludes= excludes
 	enhance.bless= function bless(o) {
-		for(var i in includes) {
-			o._enhance(i,includes[i])
+		for(var i in this.includes) {
+			o._enhance(i,this.includes[i])
 		}
 	}
 

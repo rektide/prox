@@ -23,5 +23,7 @@ util.jsonFile("fixture-meta.json").then(function(meta){
 	expect(proxed).to.have.property("righteous")
 	expect(proxed).to.have.property("retribution")
 	expect(proxed).to.have.property("reaper")
-	expect(proxed).to.have.property("_meta")
+	expect(proxed).to.have.property("_chains")
+	expect(proxed).to.not.have.property("_xxxbb")
+	console.log("done")
 })

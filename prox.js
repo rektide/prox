@@ -2,14 +2,17 @@ var cc= require("cc"),
   proxPlugin= require("./plugin/prox"),
   proxEnhance= require("./plugin/enhance")
 
-function completerFilter(ctx)
-	{console.log("~~complete~~",ctx.result,ctx.name);return ctx ? ctx.result : undefined}
+function completerFilter(ctx,cc,result){
+	return ctx ? ctx.result : undefined
+}
 
 // build a chain runner
 function runner(name,obj,cc){
 	return function() {
-		var ctx = {args:arguments,obj:obj,this:this,name:name}
-		return cc.execute(ctx)
+		var args= arguments, // Array.prototype.slice.call(arguments,0),
+		  ctx = {args:args,obj:obj,this:this,name:name},
+		  got= cc.execute(ctx)
+		return got
 	}
 }
 
@@ -86,22 +89,18 @@ function handlerMaker(obj) {
 }
 //var proxy= Proxy.create(handlerMaker(obj));
 
-function doOrMake(a) {
-	var handler= handlerMaker(a||{})
+function doOrMake(obj) {
+	obj= obj||{}
+	var handler= handlerMaker(obj)
 	var proxied= Proxy.create(handler)
 
 	proxPlugin.proxChain(proxied,handler._chains)
-	proxPlugin.proxObj(proxied,handler._obj)
-	proxEnhance.proxEnhance(proxied,{chain:proxChain,obj:proxObj,enhance:proxEnhance})
+	proxPlugin.proxObj(proxied,obj)
+	proxEnhance.proxEnhance(proxied)
 
 	return proxied
 }
 
-
-/*
-module prox {
-	export var mkprox= doOrMake(handlerMaker) }
-*/
-
-exports.prox= doOrMake
+module.exports= doOrMake
+module.exports.prox= doOrMake
 
