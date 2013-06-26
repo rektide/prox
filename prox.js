@@ -1,18 +1,15 @@
 var cc= require("cc"),
-  proxPlugin= require("./plugin/prox").enhanceHandler
-
+  proxPlugin= require("./plugin/prox"),
+  proxEnhance= require("./plugin/enhance")
 
 function completerFilter(ctx)
-	{return ctx ? ctx.result : undefined}
+	{console.log("~~complete~~",ctx.result,ctx.name);return ctx ? ctx.result : undefined}
 
 // build a chain runner
-function runner(name,obj,filter)
-{
-	filter.filter= completerFilter
-	var chain= cc(filter,{name:name,undefinedOnlyNonReturnable:true})
+function runner(name,obj,cc){
 	return function() {
-		var ctx = {args:arguments,obj:obj}
-		return chain.execute(ctx)
+		var ctx = {args:arguments,obj:obj,this:this,name:name}
+		return cc.execute(ctx)
 	}
 }
 
@@ -56,7 +53,7 @@ var defaultChains= {
 		ctx.result= name in ctx.obj},
 	hasOwn: function(ctx) {var name= ctx.args[0]
 		ctx.result= ({}).hasOwnProperty.call(ctx.obj, name)},
-	get: function(ctx) {var receiver= ctx.args[0], name= ctx.args[1]
+	get: function(ctx) {console.log("GET");var receiver= ctx.args[0], name= ctx.args[1]
 		ctx.result= obj[name]
 	},
 	set: function(ctx) {var receiver= ctx.args[0], name= ctx.args[1], val= ctx.args[2]
@@ -68,19 +65,21 @@ var defaultChains= {
 			result.push(name)
 		ctx.result= result
 	},
-	keys: function(ctx) {
+	keys: function(ctx) {var obj= ctx.obj
 		ctx.result= Object.keys(obj);
 	}
 }
 
-function handlerMaker(obj,args) {
-	return new function prox(obj) {
+function handlerMaker(obj) {
+	return new function(obj) {
 		this._obj= obj
-		var chains= this._chains= {}
+		this._chains= {}
 		for(var i in defaultChains) {
-			var chain= defaultChains[i]
-			chains[i]= chain
-			this[i]= runner(i,obj,chain)
+			var base= defaultChains[i],
+			  _cc= cc(base,{name:i,undefinedOnlyNonReturnable:true})
+			base.postProcess= completerFilter
+			this._chains[i]= _cc
+			this[i]= runner(i,obj,_cc)
 		}
 		return this
 	}(obj||{});
@@ -88,12 +87,12 @@ function handlerMaker(obj,args) {
 //var proxy= Proxy.create(handlerMaker(obj));
 
 function doOrMake(a) {
-	var handler= handleMaker(a||{})
+	var handler= handlerMaker(a||{})
 	var proxied= Proxy.create(handler)
 
-	proxChain(proxied,handler._chains)
-	proxObj(proxied,handler._obj)
-	proxEnhance(proxied,{chain:proxChain,obj:proxObj,enhance:proxEnhance})
+	proxPlugin.proxChain(proxied,handler._chains)
+	proxPlugin.proxObj(proxied,handler._obj)
+	proxEnhance.proxEnhance(proxied,{chain:proxChain,obj:proxObj,enhance:proxEnhance})
 
 	return proxied
 }
@@ -101,11 +100,8 @@ function doOrMake(a) {
 
 /*
 module prox {
-	export var mkprox= doOrMake(handleMaker) }
+	export var mkprox= doOrMake(handlerMaker) }
 */
 
-
-exports.prox= doOrMake(handleMaker)
-
-
+exports.prox= doOrMake
 

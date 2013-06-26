@@ -42,7 +42,7 @@ var proxEnhance= exports.proxEnhance= function(o,opts) {
 	opts= opts||{}
 	var chains= handler._chains,
 	  includes= opts.includes||{},
-	  excludes= opts.excludes||[],
+	  excludes= opts.excludes||[]
 
 	function enhance(name,enhancer){
 		if(typeof name == "function" && name.name){ //unpack

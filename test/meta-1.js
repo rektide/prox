@@ -16,16 +16,12 @@ var
 
 // load sample data
 util.jsonFile("fixture-meta.json").then(function(meta){
-
-	console.log("META",meta)
-	
 	// make our first prox
 	var proxed= prox.prox(meta)
-	
+
 	// "use"
 	expect(proxed).to.have.property("righteous")
 	expect(proxed).to.have.property("retribution")
 	expect(proxed).to.have.property("reaper")
 	expect(proxed).to.have.property("_meta")
-
 })
