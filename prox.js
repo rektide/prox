@@ -53,8 +53,8 @@ var defaultChains= {
 		ctx.result= name in ctx.obj},
 	hasOwn: function(ctx) {var name= ctx.args[0]
 		ctx.result= ({}).hasOwnProperty.call(ctx.obj, name)},
-	get: function(ctx) {console.log("GET");var receiver= ctx.args[0], name= ctx.args[1]
-		ctx.result= obj[name]
+	get: function(ctx) {var receiver= ctx.args[0], name= ctx.args[1]
+		ctx.result= ctx.obj[name]
 	},
 	set: function(ctx) {var receiver= ctx.args[0], name= ctx.args[1], val= ctx.args[2]
 		ctx.obj[name]= val
@@ -65,8 +65,8 @@ var defaultChains= {
 			result.push(name)
 		ctx.result= result
 	},
-	keys: function(ctx) {var obj= ctx.obj
-		ctx.result= Object.keys(obj);
+	keys: function(ctx) {
+		ctx.result= Object.keys(ctx.obj);
 	}
 }
 

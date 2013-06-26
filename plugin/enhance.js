@@ -11,20 +11,21 @@ if(typeof exports === undefined)
  */
 var meta= exports.meta= function(o,meta,ext,opts) {
 	opts= opts||{}
-	var chains= o._chains||opts.chains,
+	var chains= opts.chains||o._chains,
 	  paranoid= opts.beParanoid
 	chains.getPropertyDescriptor.chain.push(function(ctx){var cname= ctx.args[0]
 		if(cname == meta) {
 			// TODO: ctx.results = ??
 		}
 	})
-	chains.getPropertyNames.chain.push(paranoid?function(ctx){
-		if(ctx.results.indexOf(name) == -1)
+	chains.getPropertyNames.chain.push(paranoid?
+		function(ctx){
+			if(ctx.results.indexOf(name) == -1)
+				ctx.results.push(name)
+		} :function(ctx){
 			ctx.results.push(name)
-	}
-	:function(ctx){}(
-		ctx.results.push(name)
-	))
+		}
+	)
 	chains.has.chain.push(function(ctx){var cname= ctx.args[0]
 		if(cname == meta)
 			ctx.results= true
