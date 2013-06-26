@@ -20,17 +20,17 @@ var meta= exports.meta= function(o,meta,ext,opts) {
 	})
 	chains.getPropertyNames.chain.push(paranoid?
 		function(ctx){
-			if(ctx.results.indexOf(name) == -1)
-				ctx.results.push(name)
+			if(ctx.results.indexOf(meta) == -1)
+				ctx.results.push(meta)
 		} :function(ctx){
-			ctx.results.push(name)
+			ctx.results.push(meta)
 		}
 	)
 	chains.has.chain.push(function(ctx){var cname= ctx.args[0]
 		if(cname == meta)
 			ctx.results= true
 	})
-	chains.get.chain.push(function(ctx){var cname= ctx.args[0]
+	chains.get.chain.push(function(ctx){var cname= ctx.args[1];
 		if(cname == meta)
 			ctx.result= ext
 	})
