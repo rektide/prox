@@ -9,19 +9,23 @@ var
   util= require("../util")
 
 // install -as-promised-core to our testing libraries
-(function(){
+;(function(){
 	chai.use(chaiAsPromise)
 	mochaAsPromise()
 })()
 
 // load sample data
-var meta= util.jsonFile("fixture-meta.json").sample1
+util.jsonFile("fixture-meta.json").then(function(meta){
 
-// make our first prox
-var proxed= prox.prox(meta)
+	console.log("META",meta)
+	
+	// make our first prox
+	var proxed= prox.prox(meta)
+	
+	// "use"
+	expect(proxed).to.have.property("righteous")
+	expect(proxed).to.have.property("retribution")
+	expect(proxed).to.have.property("reaper")
+	expect(proxed).to.have.property("_meta")
 
-// "use"
-expect(proxed).to.have.property("righteous")
-expect(proxed).to.have.property("retribution")
-expect(proxed).to.have.property("reaper")
-expect(proxed).to.have.property("_meta")
+})
