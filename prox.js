@@ -104,4 +104,4 @@ module prox {
 */
 
 exports.prox= doOrMake
-
+exports.defaultChains= defaultChains
