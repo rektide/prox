@@ -76,9 +76,9 @@ var defaultChains= {
 function handlerMaker(obj) {
 	return new function(obj) {
 		this._obj= obj
-		this._chains= {}
-		for(var i in defaultChains) {
-			var base= defaultChains[i],
+		._chains= {}
+		for(var i in module.exports.defaultChains) {
+			var base= module.exports.defaultChains[i],
 			  _cc= cc(base,{name:i,undefinedOnlyNonReturnable:true})
 			base.postProcess= completerFilter
 			this._chains[i]= _cc
@@ -103,4 +103,9 @@ function doOrMake(obj) {
 
 module.exports= doOrMake
 module.exports.prox= doOrMake
+module.exports.defaultChains= defaultChains
 
+/*
+module prox {
+	export var mkprox= doOrMake(handlerMaker) }
+*/

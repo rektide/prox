@@ -16,7 +16,7 @@ var crud= exports.enhance= exports.crud= function(o,opts) {
 
 	if(!ctxFul) {
 		// does not expose request ctx directly, safer-like.
-		chain.set.chains.push(function(){
+		chain.set.chain.push(function(){
 			return !updateOnly ? 
 				function(ctx){var name= ctx.args[1], val= ctx.args[2]
 					evt.emit(o[name]?"update":"create",name,val)
@@ -34,7 +34,7 @@ var crud= exports.enhance= exports.crud= function(o,opts) {
 			})
 	} else {
 		// simpler path that emits the entire ctx for app to dice and mangle in inadvisable ways
-		chain.set.chains.push(function(){
+		chain.set.chain.push(function(){
 			return !updateOnly ? 
 				function(ctx){var name= ctx.args[1]
 					evt.emit(o[name]?"update":"create",ctx)
