@@ -76,7 +76,7 @@ var defaultChains= {
 function handlerMaker(obj) {
 	return new function(obj) {
 		this._obj= obj
-		._chains= {}
+		this._chains= {}
 		for(var i in module.exports.defaultChains) {
 			var base= module.exports.defaultChains[i],
 			  _cc= cc(base,{name:i,undefinedOnlyNonReturnable:true})
