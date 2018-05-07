@@ -1,4 +1,4 @@
-import cc from "cc"
+import cc from "command-chain"
 
 /**
 * This initializer sets up a `ctx.props` helper that other initializers can add to to define properties
@@ -28,7 +28,7 @@ export function _chain(ctx){
 		value: undefined,
 		writable: true, // users are free to a chain
 		configurable: true // if you don't like this prop, that's fine. dwtw.
-	})
+	}
 	ctx.next()
 }
 

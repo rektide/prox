@@ -1,5 +1,5 @@
 import handler from "./handler"
-import initialize from "./initialze"
+import initialize from "./initialize"
 // import prox from "./plugin/prox"
 // import enhance from "./plugin/enhance"
 

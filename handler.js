@@ -1,5 +1,5 @@
-import cc from "cc"
-import defaultChain from "./default-chain"
+import cc from "command-chain"
+import defaultChain from "./default-chains"
 
 export const handler= {}
 export default handler
@@ -13,10 +13,11 @@ Object.keys( defaultChain).forEach( function( method){
 		  // get the chain we want to run
 		  chain= target._chain&& target._chain[ method]|| defaultChain[ method]
 		// run chain
-		return cc({
+		const val= cc({
 			chain, // the chain to run!
 			method, // which event on the proxy is firing
 			args
 		})
+		return val
 	}
 })

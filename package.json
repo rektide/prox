@@ -3,7 +3,9 @@
 	"version": "1.0.0",
 	"description": "middleware for proxies",
 	"main": "prox.js",
-	"scripts": {},
+	"scripts": {
+		"test": "node -r esm .test"
+	},
 	"repository": {
 		"type": "git",
 		"url": "git://github.com/rektide/prox.git"
@@ -12,5 +14,12 @@
 	"license": "MIT",
 	"bugs": {
 		"url": "https://github.com/rektide/prox/issues"
+	},
+	"dependencies": {
+		"command-chain": "^66.0.0"
+	},
+	"devDependencies": {
+		"esm": "^3.0.29",
+		"tape": "^4.9.0"
 	}
 }
