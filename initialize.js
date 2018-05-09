@@ -17,11 +17,11 @@ export function props(ctx){
 		return
 	}
 	// now define the requested properties
-	Object.defineProperties(ctx.obj, ctx.props)
+	Object.defineProperties(ctx.proxied, ctx.props)
 }
 
 /**
-* Create an empty `obj._chain` that is not enumerable, such that when someone does define it it will be invisible.
+* Create an empty `proxied._chain` that is not enumerable, such that when someone does define it it will be invisible.
 */
 export function _chain(ctx){
 	ctx.props._chain= {
@@ -41,7 +41,7 @@ export const initializers= [props, _chain]
 /**
 * Run each initializer against obj
 */
-export function run(obj, opts, proxied){
+export function initialize(obj, opts, proxied){
 	const chain= opts&& opts.initializers|| initializers
 	cc({
 		obj,
@@ -51,4 +51,4 @@ export function run(obj, opts, proxied){
 	})
 	return obj
 }
-export default run
+export default initialize

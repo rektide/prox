@@ -10,7 +10,7 @@ export function prox(obj= {}, opts){
 	// create a fresh proxy on the object
 	const proxied= new Proxy(obj, handler)
 	// run any registered initializers. opts.initializers will override global.
-	initialize(proxied, opts, proxied)
+	initialize(obj, opts, proxied)
 	return proxied
 }
 export default prox
