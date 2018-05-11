@@ -20,7 +20,8 @@ tape("normal operation", function(t){
 })
 
 tape("ongoingly manipulate .set trap", function(t){
-	const o= prox()
+	const underlying= {}
+	const o= prox(underlying)
 
 	// base case
 	o.blue= 4

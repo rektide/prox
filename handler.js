@@ -6,6 +6,7 @@ export default handler
 
 // for each proxy handler method, create a small `cc` invoker
 Object.keys( defaultChain).forEach( function( method){
+	// create a handler taking all the trap arguments
 	handler[ method]= function ( ...args){
 		const
 		  // get target
