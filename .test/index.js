@@ -1,14 +1,6 @@
 import tape from "tape"
 import prox from ".."
 
-function doubleOutput( ctx){
-	const val= ctx.args[2]
-	if ( !isNaN( val)){
-		ctx.args[2]*= 2
-	}
-	ctx.next()
-}
-
 tape("normal operation", function(t){
 	const o= prox.make({})
 	o.blue = 0
@@ -18,7 +10,15 @@ tape("normal operation", function(t){
 	t.end()
 })
 
-tape("ongoingly manipulate .set trap", function(t){
+function doubleOutput( ctx){
+	const val= ctx.args[2]
+	if ( !isNaN( val)){
+		ctx.args[2]*= 2
+	}
+	ctx.next()
+}
+
+tape("directly fiddle a .set trap", function(t){
 	const underlying= {}
 	const o= prox.make(underlying)
 
@@ -50,3 +50,37 @@ tape("ongoingly manipulate .set trap", function(t){
 	t.equal( o.blue, 9, "setting works as normal once ._chain is cleared")
 	t.end()
 })
+
+
+var doublePlugin= {
+	set(ctx){
+		doubleOutput(ctx)
+	},
+	install( prox){
+		prox.chain("set").install( doublePlugin.set)
+	},
+	uninstall( prox){
+		prox.chain("set").uninstall( doublePlugin.set)
+	}
+}
+doublePlugin.set.phase= "prerun"
+
+tape("install a double plugin", function(t){
+	const
+	  o= prox.make(),
+	  startPlugins = o._prox.plugins
+	o._prox.plugins= startPlugins.concat( doublePlugin)
+	o.n = 2
+	t.equal( o.n, 4, "double plugin")
+
+	o._prox.plugins= o._prox.plugins.concat( doublePlugin)
+	o.n = 16
+	t.equal( o.n, 64, "two double plugins")
+
+	o._prox.plugins= startPlugins
+	o.n = 99
+	t.equal( o.n, 99, "resetting plugins clears behavior")
+	t.end()
+})
+
+// todo: plugin test that starts from prox with no defaults, adds a plugin, removes plugin, checks that chains are clear
