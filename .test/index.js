@@ -1,6 +1,5 @@
 import tape from "tape"
 import prox from ".."
-import { defaultHandler } from "../default-chains"
 
 function doubleOutput( ctx){
 	const val= ctx.args[2]
@@ -11,7 +10,7 @@ function doubleOutput( ctx){
 }
 
 tape("normal operation", function(t){
-	const o= prox()
+	const o= prox.make({})
 	o.blue = 0
 	t.equal(o.blue, 0)
 	o.red = 255
@@ -21,39 +20,32 @@ tape("normal operation", function(t){
 
 tape("ongoingly manipulate .set trap", function(t){
 	const underlying= {}
-	const o= prox(underlying)
+	const o= prox.make(underlying)
 
 	// base case
 	o.blue= 4
 	t.equal( o.blue, 4, "fresh proxy set")
 
 	// create a ._chain, empty
-	o._chain= {}
 	o.blue= 5
 	t.equal( o.blue, 5, "._chain but no ._chain.set behaves normally")
 
 	// now lets monkey with .set
-	o._chain.set= [
-		doubleOutput,
-		defaultHandler.set
-	]
+	const chain= o._prox.chain("set")
+	chain.unshift( doubleOutput)
 	o.blue= 6
 	o.car= "honk"
 	t.equal( o.blue, 12, "setDouble doubled a number")
 	t.equal( o.car, "honk", "setDouble passed through non-number")
 
 	// double monkey! what does it mean?!
-	o._chain.set= [
-		doubleOutput,
-		doubleOutput,
-		defaultHandler.set
-	]
+	chain.unshift( doubleOutput)
 	t.equal( o.blue, 12, "existing value remains intact")
 	o.blue= 24
 	t.equal( o.blue, 96, "output is twice doubled")
 
 	// revert our monkeyworking
-	o._chain= undefined
+	chain.rebuild() // will clear our monkeying
 	o.blue= 9
 	t.equal( o.blue, 9, "setting works as normal once ._chain is cleared")
 	t.end()
