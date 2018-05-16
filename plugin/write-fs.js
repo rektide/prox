@@ -1,10 +1,10 @@
 import { writeFile as WriteFile } from "fs"
-import { join } from "path"
+import { resolve } from "path"
 import { promisify } from "util"
 
 const writeFile= promisify( WriteFile)
 
-class WriteFs{
+export class WriteFs{
 	static install( prox, symbol){
 		prox[ s]= new WriteFs(symbol)
 	}
@@ -27,9 +27,11 @@ class WriteFs{
 			retun ctx.next()
 		}
 		
-		const paths= []
-		if( this.basePath){
-			paths.push( this.basePath)
+		const
+		  paths= [],
+		  localPath= this.localPath!== undefined? this.localPath: ctx.prox.localPath
+		if( localPath){
+			paths.push( localPath)
 		}
 		// walk up all proxies
 		let walk= val
@@ -37,7 +39,11 @@ class WriteFs{
 			paths.push( walk._prox.parentKey)
 			walk= walk._prox.parent
 		}
-		const path= join( paths)
+		// replace ~ with HOME
+		if( paths[ 0]&& paths[0][0]=== "~"&& process.env.HOME){
+			paths[ 0]= process.env.HOME+ paths[0].substr( 1)
+		}
+		const path= resolve( paths)
 
 		// queue a write on the tail
 		this.tail= this.tail.then(function(){
@@ -45,3 +51,6 @@ class WriteFs{
 		})
 	}
 }
+WriteFs.set.phase= "postrun"
+
+export default WriteFs
