@@ -66,8 +66,12 @@ export class Prox{
 		for( var chainSymbol of Object.values( chainSymbols)){
 			finalize[ chainSymbol]= new Chain()
 		}
+		const optsPlugins= opts.plugins
+		opts.plugins= null
+
 		// define defaults, pull in opts, & save obj
 		Object.assign( this, opts, finalize)
+		opts.plugins= optsPlugins
 
 		// create proxyied object that we are the handler for
 		this.proxied= new Proxy( obj, this)
@@ -75,7 +79,7 @@ export class Prox{
 		// set plugins, which will run them
 		const defaultAndPlugins= [
 		  ...(opts.defaultPlugins|| defaultPlugins),
-		  ...(opts.plugins|| []) ]
+		  ...(optsPlugins|| []) ]
 		this.plugins= [...new Set(defaultAndPlugins)]
 	}
 	set plugins( plugins){
@@ -83,18 +87,20 @@ export class Prox{
 		// faithfully returns to same state. unsure whether i can make this big demand but going with it for now.
 
 		// uninstall all old plugins, giving us a pristine state
-		this[ Prox.pluginsSymbol].forEach(( p,i)=> {
+		(this[ Prox.pluginsSymbol]|| []).forEach(( p,i)=> {
 			p.uninstall(this, this[ Prox.pluginsContextSymbol[ i]])
 		})
 		// at this point there really shouldn't be anything on `.chains`
 
-		// install all current plugins
+		// save plugins
 		this[ Prox.pluginsSymbol]= plugins
-		this[ Prox.pluginContextSymbol]= this[ Prox.pluginsSymbol].map( p=> {
-			var s= Symbol()
-			p.install(this, s)
-			return s
-		})
+		if( !plugins){
+			return
+		}
+		// set a symbol for each plugin
+		this[ Prox.pluginsContextSymbol]= plugins.map( _=> Symbol())
+		// install all current plugins
+		plugins.forEach(( plugin, i)=> plugin.install( this, this[ Prox.pluginsContextSymbol][ i]))
 	}
 	get plugins(){
 		return this[ Prox.pluginsSymbol]

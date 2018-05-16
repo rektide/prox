@@ -7,25 +7,28 @@ import Prox from "../prox"
 export const aggro= {
 	set: function( ctx){
 		const
-		  target= ctx.args[ 0],
-		  key= ctx.args[1],
-		  prox= ctx.prox,
-		  childProx= target._prox
-		if( childProx&& childProx.parent=== ctx.prox&& childProx.parentKey=== key){
-			// object already has a prox with the correct location information
-			return
+		  [ target, key, val]= ctx.args,
+		  parentProx= ctx.prox,
+		  existingProx= val&& val._prox
+		if( !val){
+			return ctx.next()
 		}
-		const
-		  plugins= ctx.prox.aggroPlugins|| ctx.prox.plugins
-		  newProx= new Prox( target, { plugins}),
-		target._prox.parent= ctx.prox
-		target._prox.parentKey= ctx.args[ 1]
+		if( existingProx&& existingProx.parent=== parentProx&& existingProx.parentKey=== key){
+			// object already has a prox with the correct location information
+			return ctx.next()
+		}
+		const plugins= parentProx.aggroPlugins|| parentProx.plugins
+		const proxied= Prox.make( val, { plugins})
+		proxied._prox.parent= ctx.prox
+		proxied._prox.parentKey= ctx.args[ 1]
 
+		// swap in the new proxied object
+		ctx.args[ 2]= proxied
 		ctx.next()
 	},
 	install: function( prox){
 		prox.chain("set").install( aggro.set)
-		for( var key of prox.obj){
+		for( var key in prox.obj){
 			prox.proxied[ key]= prox.proxied[ key]
 		}
 	},
@@ -38,8 +41,9 @@ export const aggro= {
 			}
 			prox.proxied[ key]= prox.proxied[ key]._prox.obj
 		}
-	}
+	},
+	name: "aggro"
 }
-aggro.set.phase= "postrun"
+aggro.set.phase= "prerun"
 
 export default aggro
