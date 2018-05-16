@@ -29,11 +29,13 @@ tape("child's contents are also proxed", function(t){
 	const
 	  o= prox.make({}, {plugins: [aggro]}),
 	  more= {
-		stuff: {}
+		stuff: {},
+		primitive: 42
 	  }
 	o.more= more
 	t.ok( o.more._prox, "child has `_prox`")
 	t.ok( o.more.stuff._prox, "child's content's have `_prox`")
+	t.ok( o.more.primitive, 42, "child's primitive content's unchanged")
 	t.end()
 })
 
@@ -57,10 +59,6 @@ tape("one object can be aggroed by two prox", function(t){
 	// let's re-assert our proxed1, which ought be unchanged
 	t.equal( proxed1.alpha._prox.parent, proxed1._prox, "first proxying still knows it's parent")
 	t.equal( proxed1.alpha._prox.parentKey, "alpha", "first proxying still knows it's parent's key")
-	t.end()
-})
-
-tape("aggro works recursively", function(t){
 	t.end()
 })
 
