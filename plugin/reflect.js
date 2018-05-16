@@ -8,20 +8,27 @@ import { forEach } from "../util/generator"
 export class Reflect{
 	static makeHandler( method){
 		const reflected = _reflect[ method]
-		function handler( ctx){
+		function reflectHandler( ctx){
 			ctx.output= reflected( ...ctx.args) // run, save `output`
 			ctx.next() // run everything
 	  	}
-		handler.phase = "run"
-		return handler
+		reflectHandler.phase = "run"
+		return reflectHandler
 	}
 	static install( prox){
-		forEach( prox.chains(), ([ chain, method])=> {
-			chain.install( singleton[ method])
-		})
+		Object
+		  .keys(chainSymbols)
+		  .map(function( key){
+			//console.log({key})
+			const chain= prox.chain( key)
+			chain.install( singleton[ key])
+		  })
 	}
 	static uninstall( prox){
 		forEach( prox.chains(), ([ chain, method])=> chain.install( singleton[ method]))
+	}
+	static get name(){
+		return "reflect"
 	}
 }
 Object.keys( chainSymbols).forEach( function( method){
