@@ -20,6 +20,8 @@ export const aggro= {
 		  newProx= new Prox( target, { plugins}),
 		target._prox.parent= ctx.prox
 		target._prox.parentKey= ctx.args[ 1]
+
+		ctx.next()
 	},
 	install: function( prox){
 		prox.chain("set").install( aggro.set)
