@@ -7,6 +7,7 @@ import propProx from "./plugin/prop-prox"
 
 export const defaultPlugins = [ reflect, propProx]
 export const pluginsSymbol = Symbol("plugin")
+export const pluginsContextSymbol = Symbol("plugin")
 
 /**
 * Lookup the chain by it's symbol
@@ -52,6 +53,9 @@ export class Prox{
 	static get pluginsSymbol(){
 		return pluginsSymbol
 	}
+	static get pluginsContextSymbol(){
+		return pluginsContextSymbol
+	}
 
 	constructor( obj, opts= {}){
 		const finalize = {
@@ -79,12 +83,18 @@ export class Prox{
 		// faithfully returns to same state. unsure whether i can make this big demand but going with it for now.
 
 		// uninstall all old plugins, giving us a pristine state
-		this[ Prox.pluginsSymbol].forEach( p=> p.uninstall(this))
+		this[ Prox.pluginsSymbol].forEach(( p,i)=> {
+			p.uninstall(this, this[ Prox.pluginsContextSymbol[ i]])
+		})
 		// at this point there really shouldn't be anything on `.chains`
 
 		// install all current plugins
 		this[ Prox.pluginsSymbol]= plugins
-		this[ Prox.pluginsSymbol].forEach( p=> p.install(this))
+		this[ Prox.pluginContextSymbol]= this[ Prox.pluginsSymbol].map( p=> {
+			var s= Symbol()
+			p.install(this, s)
+			return s
+		})
 	}
 	get plugins(){
 		return this[ Prox.pluginsSymbol]
