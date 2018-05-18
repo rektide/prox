@@ -1,4 +1,21 @@
-export const phases= [ "prerun", "run", "postrun"]
+export const
+  /**
+  * List of phases, in the order they are run
+  */
+  phases= [ "prerun", "run", "postrun"],
+  /**
+  * Store the handler with this symbol
+  */
+  handlerSymbol= Symbol("handler"),
+  /**
+  * Store the symbol prox allocates per-plugin-instance with this symbol
+  */
+  symbolSymbol= Symbol("symbol")
+
+export function chainEval( el){
+	this.symbol= el[ symbolSymbol]
+	return el[ handlerSymbol]( this)
+}
 
 export class Chain extends Array{
 	static get phases(){
@@ -7,67 +24,79 @@ export class Chain extends Array{
 	static set phases(v){
 		phases.splice( 0, phases.length, ...v)
 	}
+	static get handlerSymbol(){
+		return handlerSymbol
+	}
+	static get symbolSymbol(){
+		return symbolSymbol
+	}
+	static get chainEval(){
+		return chainEval
+	}
 	constructor(){
 		super()
-		this.phases = []
 	}
-	install( fn, phase){
+	[Symbol.iterator](){
+		return {
+			chain: this,
+			phase: 0,
+			pos: 0,
+			next: function(){
+				if( this.phase>= phases.length){
+					return {
+						done: true
+					}
+				}
+				const
+				  phaseName= phases[ this.phase],
+				  phase= this.chain[ phaseName]
+				if( !phase|| this.pos>= phase.length){
+					++this.phase
+					this.pos= 0
+					return this.next()
+				}
+				const value= phase[ this.pos++]
+				return {
+					value,
+					done: false
+				}
+			}
+		}
+		return iterator
+	}
+	install( handler, symbol, phase){
 		// find phase
-		if( !fn){
+		if( !handler){
 			return
 		}
 		if( phase=== undefined){
-			phase= fn.phase
+			phase= handler.phase|| "run"
 		}
-		const
-		  phaseNumber= phases.indexOf( phase),
-		  hasPhase= phaseNumber!== -1
-		let target= phaseNumber=== -1? this.free: this.phases[ phaseNumber]
-		if( !target){
-			if( hasPhase){
-				target= this.phases[ phaseNumber]= []
-			}else{
-				target= this.free= []
-			}
-		}
-		target.push( fn)
-		this.rebuild()
+		const els= this[ phase]|| (this[ phase]= [])
+		els.push({
+			[handlerSymbol]: handler,
+			[symbolSymbol]: symbol
+		})
 	}
-	uninstall( fn, phase){
+	uninstall( handler, symbol, phase){
 		// find phase
-		if( !fn){
+		if( !handler){
 			return
 		}
 		if( phase=== undefined){
-			phase= fn.phase
+			phase= hanndler.phase|| "run"
 		}
-		const
-		  phaseNumber= phases.indexOf( phase),
-		  hasPhase= phaseNumber!== -1
-		let target= phaseNumber=== -1? this.free: this.phases[ phaseNumber]
-		if( !target){
-			return
+		const els= this[ phase]
+		if( !els){
+			return false
 		}
-		const index= target.indexOf( fn)
-		if( index=== -1){
-			return
-		}
-		target.splice( index, 1)
-		this.rebuild()
-	}
-	rebuild(){
-		// zero self out
-		this.splice( 0, this.length)
-		// rebuild our contents from the phases + free
-		for( let phaseNumber in phases){
-			var phaseHandlers= this.phases[ phaseNumber]
-			if( phaseHandlers){
-				this.push( ...phaseHandlers)
+		for( let i in els){
+			const el= els[ i]
+			if( el[ handlerSymbol]=== handler&& el[ pluginsContextSymbol]=== symbol){
+				els.splice( i, 1)
+				return true
 			}
-		}
-		// rebuild our free handlers at the end
-		if( this.free){
-			this.push( ...this.free)
+			return false
 		}
 	}
 }
