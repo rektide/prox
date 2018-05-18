@@ -84,7 +84,7 @@ export class Chain extends Array{
 			return
 		}
 		if( phase=== undefined){
-			phase= hanndler.phase|| "run"
+			phase= handler.phase|| "run"
 		}
 		const els= this[ phase]
 		if( !els){

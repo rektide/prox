@@ -2,39 +2,35 @@ import { chainSymbols } from "../constants"
 import { default as _reflect } from "../util/reflect"
 import { forEach } from "../util/generator"
 
+const run= {}
+
 /**
 * Minimal wrapper to call JavaScript's `Reflect` implementations
 */
-export class Reflect{
-	static makeHandler( method){
-		const reflected = _reflect[ method]
-		function reflectHandler( ctx){
+export const reflect = {
+	phases: {
+		run
+	},
+	name: "reflect"
+}
+
+export function makeHandler( method){
+	const
+	  reflected = _reflect[ method],
+	  name = method + "Reflect",
+	  // this hack lets us, via inference, dynamically pick a friendly function name
+	  tmp= {
+		[ name]: function( ctx){
 			ctx.output= reflected( ...ctx.args) // run, save `output`
 			ctx.next() // run everything
-	  	}
-		reflectHandler.phase = "run"
-		return reflectHandler
-	}
-	static install( prox){
-		Object
-		  .keys(chainSymbols)
-		  .map(function( key){
-			//console.log({key})
-			const chain= prox.chain( key)
-			chain.install( singleton[ key])
-		  })
-	}
-	static uninstall( prox){
-		forEach( prox.chains(), ([ chain, method])=> chain.install( singleton[ method]))
-	}
-	static get name(){
-		return "reflect"
-	}
+		}
+	  }
+	return tmp[ name]
 }
+
+
 Object.keys( chainSymbols).forEach( function( method){
-	Reflect.prototype[ method]= Reflect.makeHandler( method)
+	run[ method]= makeHandler( method)
 })
 
-export default Reflect
-
-export const singleton = new Reflect()
+export default reflect

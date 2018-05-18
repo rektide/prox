@@ -6,8 +6,8 @@ import reflect from "./plugin/reflect"
 import propProx from "./plugin/prop-prox"
 
 export const defaultPlugins = [ reflect, propProx]
-export const pluginsSymbol = Symbol("plugin")
-export const pluginsContextSymbol = Symbol("plugin")
+export const pluginsSymbol = Symbol("plugin") // list of plugins is stored here
+export const pluginsContextSymbol= Symbol("plugin") // 
 
 /**
 * Lookup the chain by it's symbol
@@ -15,6 +15,8 @@ export const pluginsContextSymbol = Symbol("plugin")
 export function defaultChainLookup(prox, chainSymbol){
 	return prox[ chainSymbol]
 }
+
+let _id= 0
 
 /**
 * prox is a proxy 'handler' instance, pointing to a specific obj
@@ -39,7 +41,8 @@ export class Prox{
 				prox: this,
 				chain: chainLookup(this, chainSymbol),
 				method, // which event on the proxy is firing
-				args
+				args,
+				eval: Chain.chainEval
 			})
 			return val
 		}
@@ -60,14 +63,15 @@ export class Prox{
 	constructor( obj, opts= {}){
 		const finalize = {
 		  obj,
-		  [Prox.pluginsSymbol]: [] // we will initialize this once we create the proxy, via our `plugins`' setter
+		  [Prox.pluginsSymbol]: [], // we will initialize this once we create the proxy, via our `plugins`' setter
+		  id: ++_id
 		}
 		// create empty handler chains
 		for( var chainSymbol of Object.values( chainSymbols)){
 			finalize[ chainSymbol]= new Chain()
 		}
 		const optsPlugins= opts.plugins
-		opts.plugins= null
+		delete opts.plugins
 
 		// define defaults, pull in opts, & save obj
 		Object.assign( this, opts, finalize)
@@ -80,27 +84,66 @@ export class Prox{
 		const defaultAndPlugins= [
 		  ...(opts.defaultPlugins|| defaultPlugins),
 		  ...(optsPlugins|| []) ]
-		this.plugins= [...new Set(defaultAndPlugins)]
+		this.plugins= defaultAndPlugins
 	}
 	set plugins( plugins){
 		// torn about this impl.	ideally every plugin is powered by other state of Prox & uninstall & install
 		// faithfully returns to same state. unsure whether i can make this big demand but going with it for now.
-
+		this.clearPlugins();
+		// we just uninstalled everything we have, now clear it.
+		(plugins|| []).forEach( plugin=> this.addPlugin( plugin))
+	}
+	clearPlugins(){
 		// uninstall all old plugins, giving us a pristine state
-		(this[ Prox.pluginsSymbol]|| []).forEach(( p,i)=> {
-			p.uninstall(this, this[ Prox.pluginsContextSymbol[ i]])
-		})
-		// at this point there really shouldn't be anything on `.chains`
-
-		// save plugins
-		this[ Prox.pluginsSymbol]= plugins
-		if( !plugins){
-			return
+		const oldPlugins= this[ pluginsSymbol]|| []
+		for( let i= oldPlugins.length - 1; i>= 0; --i){
+			const
+			  plugin= oldPlugins[ i],
+			  contextSymbol= this[ pluginsContextSymbol][ i],
+			  ctx= this[ contextSymbol]
+			// for each phase on the plugin
+			for( const [phaseName, phase] of Object.entries( plugin.phases|| [])){
+				// for each chain handler in the phase
+				for( const [chainName, handler] of Object.entries( phase)){
+					const chain= this[ chainSymbols[ chainName]]
+					chain.uninstall( handler, contextSymbol, phaseName)
+				}
+			}
+			// do plugins static uninstall
+			if( plugin.uninstall){
+				plugin.uninstall( this, contextSymbol)
+			}
+			// do instance's uninstall
+			if( ctx&& ctx.uninstall){
+				ctx.uninstall( this, contextSymbol)
+			}
+			// cleanup context
+			delete this[ contextSymbol]
 		}
-		// set a symbol for each plugin
-		this[ Prox.pluginsContextSymbol]= plugins.map( _=> Symbol())
-		// install all current plugins
-		plugins.forEach(( plugin, i)=> plugin.install( this, this[ Prox.pluginsContextSymbol][ i]))
+		this[ pluginsSymbol]= []
+		this[ pluginsContextSymbol]= []
+	}
+	addPlugin( plugin){
+		const contextSymbol= Symbol()
+		// save this plugin, & it's context symbol
+		this[ pluginsSymbol].push( plugin)
+		this[ pluginsContextSymbol].push( contextSymbol)
+
+		for( const [phaseName, phase] of Object.entries( plugin.phases|| [])){
+			for( const [chainName, handler] of Object.entries( phase)){
+				const chain= this[ chainSymbols[ chainName]]
+				chain.install( handler, contextSymbol, phaseName)
+			}
+		}
+		if( plugin.install){
+			const pluginContext= plugin.install( this, contextSymbol)
+			if( pluginContext!== undefined){
+				this[ contextSymbol]= pluginContext
+			}
+		}
+		if( !this[ contextSymbol] && plugin instanceof Function){
+			this[ contextSymbol]= new plugin( this, contextSymbol)
+		}
 	}
 	get plugins(){
 		return this[ Prox.pluginsSymbol]
@@ -127,5 +170,23 @@ export class Prox{
 Object.entries( chainSymbols).forEach(([ method, chainSymbol])=> {
 	Prox.prototype[ method]= Prox.handler( method, chainSymbol)
 })
+
+/**
+* To make debugging easier, handlers are permitted a suffix to their name. Strip this of to their name. Strip this of to their name. Find the suffix-less name.
+*/
+function stripHandlerSuffix( name){
+	if( chainSymbols[ name]){
+		// name is the exact name, had no suffix
+		return name
+	}
+	for( const chain in chainSymbols){
+		if( name.startsWith( chain)){
+			return chain
+		}
+	}
+	const err= new Error(`Failed to de-suffix \`${name}\` to a chain name`)
+	err.name= name
+	throw err
+}
 
 export default Prox

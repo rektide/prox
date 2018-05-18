@@ -18,38 +18,38 @@ function doubleOutput( ctx){
 	ctx.next()
 }
 
-tape("directly fiddle a .set trap", function(t){
-	const underlying= {}
-	const o= prox.make(underlying)
-
-	// base case
-	o.blue= 4
-	t.equal( o.blue, 4, "fresh proxy set")
-
-	// create a ._chain, empty
-	o.blue= 5
-	t.equal( o.blue, 5, "._chain but no ._chain.set behaves normally")
-
-	// now lets monkey with .set
-	const chain= o._prox.chain("set")
-	chain.unshift( doubleOutput)
-	o.blue= 6
-	o.car= "honk"
-	t.equal( o.blue, 12, "setDouble doubled a number")
-	t.equal( o.car, "honk", "setDouble passed through non-number")
-
-	// double monkey! what does it mean?!
-	chain.unshift( doubleOutput)
-	t.equal( o.blue, 12, "existing value remains intact")
-	o.blue= 24
-	t.equal( o.blue, 96, "output is twice doubled")
-
-	// revert our monkeyworking
-	chain.rebuild() // will clear our monkeying
-	o.blue= 9
-	t.equal( o.blue, 9, "setting works as normal once ._chain is cleared")
-	t.end()
-})
+//tape("directly fiddle a .set trap", function(t){
+//	const underlying= {}
+//	const o= prox.make(underlying)
+//
+//	// base case
+//	o.blue= 4
+//	t.equal( o.blue, 4, "fresh proxy set")
+//
+//	// create a ._chain, empty
+//	o.blue= 5
+//	t.equal( o.blue, 5, "._chain but no ._chain.set behaves normally")
+//
+//	// now lets monkey with .set
+//	const chain= o._prox.chain("set")
+//	chain.unshift( doubleOutput)
+//	o.blue= 6
+//	o.car= "honk"
+//	t.equal( o.blue, 12, "setDouble doubled a number")
+//	t.equal( o.car, "honk", "setDouble passed through non-number")
+//
+//	// double monkey! what does it mean?!
+//	chain.unshift( doubleOutput)
+//	t.equal( o.blue, 12, "existing value remains intact")
+//	o.blue= 24
+//	t.equal( o.blue, 96, "output is twice doubled")
+//
+//	// revert our monkeyworking
+//	//chain.rebuild() // will clear our monkeying
+//	o.blue= 9
+//	t.equal( o.blue, 9, "setting works as normal once ._chain is cleared")
+//	t.end()
+//})
 
 
 var doublePlugin= {
