@@ -92,12 +92,12 @@ export class Chain extends Array{
 		}
 		for( let i in els){
 			const el= els[ i]
-			if( el[ handlerSymbol]=== handler&& el[ pluginsContextSymbol]=== symbol){
+			if( el[ handlerSymbol]=== handler&& el[ symbolSymbol]=== symbol){
 				els.splice( i, 1)
 				return true
 			}
-			return false
 		}
+		return false
 	}
 }
 
