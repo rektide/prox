@@ -6,14 +6,13 @@ export function getPropProx( ctx){
 }
 getPropProx.phase= "postrun"
 
-const postrun= {
-	getPropProx
-}
-
 export const propProx= {
 	phases: {
-		postrun
-	}
+		postrun: {
+			getPropProx
+		}
+	},
+	name: "propProx"
 }
 
 export default propProx

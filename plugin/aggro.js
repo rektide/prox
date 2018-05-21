@@ -33,15 +33,17 @@ setAggro.phase= "prerun"
 * Additionally, aggro attaches the parent & parentKey to the new prox, that point to the aggro prox & the key where it was set.
 */
 export const aggro= {
-	set: setAggro,
+	phases: {
+		prerun: {
+			setAggro
+		}
+	},
 	install: function( prox){
-		prox.chain("set").install( aggro.setAggro)
 		for( var key in prox.obj){
 			prox.proxied[ key]= prox.proxied[ key]
 		}
 	},
 	uninstall: function( prox){
-		prox.chain("set").uninstall( aggro.set)
 		for( var key in prox.obj){
 			const proxed= prox.obj[ key]
 			if( !( proxed|| proxed._prox)){
