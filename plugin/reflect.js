@@ -25,6 +25,7 @@ export function makeHandler( method){
 			ctx.next() // run everything
 		}
 	  }
+	tmp[ name].phase= "run"
 	return tmp[ name]
 }
 

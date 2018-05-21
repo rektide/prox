@@ -104,8 +104,10 @@ export class Prox{
 			// for each phase on the plugin
 			for( const [phaseName, phase] of Object.entries( plugin.phases|| [])){
 				// for each chain handler in the phase
-				for( const [chainName, handler] of Object.entries( phase)){
-					const chain= this[ chainSymbols[ chainName]]
+				for( const [methodName, handler] of Object.entries( phase)){
+					const
+					  chainName= stripHandlerSuffix( methodName),
+					  chain= this[ chainSymbols[ chainName]]
 					chain.uninstall( handler, contextSymbol, phaseName)
 				}
 			}
@@ -130,8 +132,10 @@ export class Prox{
 		this[ pluginsContextSymbol].push( contextSymbol)
 
 		for( const [phaseName, phase] of Object.entries( plugin.phases|| [])){
-			for( const [chainName, handler] of Object.entries( phase)){
-				const chain= this[ chainSymbols[ chainName]]
+			for( const [methodName, handler] of Object.entries( phase)){
+				const
+				  chainName= stripHandlerSuffix( methodName),
+				  chain= this[ chainSymbols[ chainName]]
 				chain.install( handler, contextSymbol, phaseName)
 			}
 		}
@@ -174,7 +178,7 @@ Object.entries( chainSymbols).forEach(([ method, chainSymbol])=> {
 /**
 * To make debugging easier, handlers are permitted a suffix to their name. Strip this of to their name. Strip this of to their name. Find the suffix-less name.
 */
-function stripHandlerSuffix( name){
+export function stripHandlerSuffix( name){
 	if( chainSymbols[ name]){
 		// name is the exact name, had no suffix
 		return name

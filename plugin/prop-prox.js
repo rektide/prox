@@ -6,21 +6,14 @@ export function getPropProx( ctx){
 }
 getPropProx.phase= "postrun"
 
-export class PropProx{
-	get get(){
-		return getPropProx
-	}
-	static install( prox){
-		prox.chain("get").install( singleton.get)
-	}
-	static uninstall( prox){
-		prox.chain("get").uninstall( singleton.get)
-	}
-	static get name(){
-		return "prop-proxy"
+const postrun= {
+	getPropProx
+}
+
+export const propProx= {
+	phases: {
+		postrun
 	}
 }
 
-export default PropProx
-
-export const singleton = new PropProx()
+export default propProx
