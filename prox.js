@@ -105,9 +105,11 @@ export class Prox{
 			for( const [phaseName, phase] of Object.entries( plugin.phases|| [])){
 				// for each chain handler in the phase
 				for( const [methodName, handler] of Object.entries( phase)){
-					const
-					  chainName= stripHandlerSuffix( methodName),
-					  chain= this[ chainSymbols[ chainName]]
+					const chainName= stripHandlerSuffix( methodName)
+					if( !chainName){
+						continue
+					}
+					const chain= this[ chainSymbols[ chainName]]
 					chain.uninstall( handler, contextSymbol, phaseName)
 				}
 			}
@@ -131,22 +133,43 @@ export class Prox{
 		this[ pluginsSymbol].push( plugin)
 		this[ pluginsContextSymbol].push( contextSymbol)
 
-		for( const [phaseName, phase] of Object.entries( plugin.phases|| [])){
-			for( const [methodName, handler] of Object.entries( phase)){
-				const
-				  chainName= stripHandlerSuffix( methodName),
-				  chain= this[ chainSymbols[ chainName]]
-				chain.install( handler, contextSymbol, phaseName)
-			}
-		}
+		// first we try to add the static phases defined on the plugin
+		this._addPhases( plugin.phases, contextSymbol)
+
+		// run any static "install" methods
 		if( plugin.install){
 			const pluginContext= plugin.install( this, contextSymbol)
 			if( pluginContext!== undefined){
+				// assign install output as the context
 				this[ contextSymbol]= pluginContext
 			}
 		}
+
+		// if there's still no context, but plugin is a function, create an instance of it
 		if( !this[ contextSymbol] && plugin instanceof Function){
 			this[ contextSymbol]= new plugin( this, contextSymbol)
+		}
+
+		// last, add any phases described by context
+		this._addPhases( this[ contextSymbol], contextSymbol)
+	}
+	/**
+	* typically users ought to addPlugin, but this underlying method allows directly adding handlers
+	* (this method is used by addPlugin)
+	*/
+	_addPhases( phases, symbol){
+		if( !phases){
+			return
+		}
+		for( const [phaseName, phase] of Object.entries( phases)){
+			for( const [methodName, handler] of Object.entries( phase)){
+				const chainName= stripHandlerSuffix( methodName)
+				if( !chainName){
+					continue
+				}
+				const chain= this[ chainSymbols[ chainName]]
+				chain.install( handler, symbol, phaseName)
+			}
 		}
 	}
 	get plugins(){
