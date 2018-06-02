@@ -1,5 +1,6 @@
 import tape from "tape"
 import prox from ".."
+import { handlerSymbol, symbolSymbol } from "../chain"
 
 tape("normal operation", function(t){
 	const o= prox.make({})
@@ -18,38 +19,46 @@ function doubleOutput( ctx){
 	ctx.next()
 }
 
-//tape("directly fiddle a .set trap", function(t){
-//	const underlying= {}
-//	const o= prox.make(underlying)
-//
-//	// base case
-//	o.blue= 4
-//	t.equal( o.blue, 4, "fresh proxy set")
-//
-//	// create a ._chain, empty
-//	o.blue= 5
-//	t.equal( o.blue, 5, "._chain but no ._chain.set behaves normally")
-//
-//	// now lets monkey with .set
-//	const chain= o._prox.chain("set")
-//	chain.unshift( doubleOutput)
-//	o.blue= 6
-//	o.car= "honk"
-//	t.equal( o.blue, 12, "setDouble doubled a number")
-//	t.equal( o.car, "honk", "setDouble passed through non-number")
-//
-//	// double monkey! what does it mean?!
-//	chain.unshift( doubleOutput)
-//	t.equal( o.blue, 12, "existing value remains intact")
-//	o.blue= 24
-//	t.equal( o.blue, 96, "output is twice doubled")
-//
-//	// revert our monkeyworking
-//	//chain.rebuild() // will clear our monkeying
-//	o.blue= 9
-//	t.equal( o.blue, 9, "setting works as normal once ._chain is cleared")
-//	t.end()
-//})
+tape("directly fiddle a .set trap", function(t){
+	// this demonstrates HOW to directly modify a chain
+	// but usually operator intervention at this level is not expected- plugins should install/uninstall automatically
+	const
+	  underlying= {},
+	  o= prox.make(underlying),
+	  // prox's `addPlugin` normally creates this:
+	  doubleOutputHandler= {
+		[handlerSymbol]: doubleOutput,
+		[symbolSymbol]: Symbol("direct-fiddle")
+	  }
+
+	// base case
+	o.blue= 4
+	t.equal( o.blue, 4, "fresh proxy set")
+
+	// create a ._chain, empty
+	o.blue= 5
+	t.equal( o.blue, 5, "._chain but no ._chain.set behaves normally")
+
+	// now lets monkey with .set
+	const chain= o._prox.chain("set")
+	chain.run.unshift( doubleOutputHandler)
+	o.blue= 6
+	o.car= "honk"
+	t.equal( o.blue, 12, "setDouble doubled a number")
+	t.equal( o.car, "honk", "setDouble passed through non-number")
+
+	// double monkey! what does it mean?!
+	chain.run.unshift( doubleOutputHandler)
+	t.equal( o.blue, 12, "existing value remains intact")
+	o.blue= 24
+	t.equal( o.blue, 96, "output is twice doubled")
+
+	// revert our monkeyworking
+	chain.run.splice(0, 2) // will clear our monkeying
+	o.blue= 9
+	t.equal( o.blue, 9, "setting works as normal once ._chain is cleared")
+	t.end()
+})
 
 
 var doublePlugin= {
