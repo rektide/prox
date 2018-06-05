@@ -10,10 +10,10 @@ export const
   /**
   * Store the symbol prox allocates per-plugin-instance with this symbol
   */
-  symbolSymbol= Symbol("symbol")
+  symbolSymbol= Symbol("symbol") // TODO: "instanceSymbol"? "pluginInstanceSymbol"? "pluginStateSymbol"?
 
 export function chainEval( el){
-	this.symbol= el[ symbolSymbol]
+	this.symbol= this.prox[ el[ symbolSymbol]]
 	return el[ handlerSymbol]( this)
 }
 
@@ -74,8 +74,8 @@ export class Chain extends Array{
 		}
 		const els= this[ phase]|| (this[ phase]= [])
 		els.push({
-			[handlerSymbol]: handler,
-			[symbolSymbol]: symbol
+			[handlerSymbol]: handler, // the handler
+			[symbolSymbol]: symbol // the symbol to retrieve the handlers state with
 		})
 	}
 	uninstall( handler, symbol, phase){

@@ -147,11 +147,14 @@ export class Prox{
 
 		// if there's still no context, but plugin is a function, create an instance of it
 		if( !this[ contextSymbol] && plugin instanceof Function){
-			this[ contextSymbol]= new plugin( this, contextSymbol)
+			const instance= new plugin( this, contextSymbol)
+			this[ contextSymbol]= instance
 		}
 
 		// last, add any phases described by context
-		this._addPhases( this[ contextSymbol], contextSymbol)
+		if( this[ contextSymbol]){
+			this._addPhases( this[ contextSymbol].phases, contextSymbol)
+		}
 	}
 	/**
 	* typically users ought to addPlugin, but this underlying method allows directly adding handlers
