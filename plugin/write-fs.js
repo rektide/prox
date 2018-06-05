@@ -5,26 +5,24 @@ import { promisify } from "util"
 const writeFile= promisify( WriteFile)
 
 export class WriteFs{
-	static install( prox, symbol){
-		prox[ s]= new WriteFs(symbol)
+	static get phases(){
+		return {
+			postrun: {
+				setWriteFs: WriteFs.prototype.set
+			}
+		}
 	}
-	static uninstall( prox, symbol){
-		delete prox[ symbol]
-	}
-
-	constructor(s){
-		this.set= this.set.bind( this)
-		this.symbol= s
+	constructor( prox, symbol){
+		this.symbol= symbol // why would we need this? chain looks up our state.
 		this.tail= Promise.resolve()
 	}
-
 	set( ctx){
 		const
 		  val= ctx.args[ 2],
 		  t= typeof( val)
 		// assert this is a primitive
 		if( t!== "string"&& t!== "number"){
-			retun ctx.next()
+			return ctx.next()
 		}
 		
 		const
@@ -43,14 +41,15 @@ export class WriteFs{
 		if( paths[ 0]&& paths[0][0]=== "~"&& process.env.HOME){
 			paths[ 0]= process.env.HOME+ paths[0].substr( 1)
 		}
-		const path= resolve( paths)
+		const path= resolve.apply( paths)
 
 		// queue a write on the tail
-		this.tail= this.tail.then(function(){
+		ctx.symbol.tail= ctx.symbol.tail.then(function(){
 			return writeFile( path, val)
 		})
+		ctx.next()
 	}
 }
-WriteFs.set.phase= "postrun"
+WriteFs.prototype.set.phase= "postrun"
 
 export default WriteFs
