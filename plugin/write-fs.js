@@ -39,7 +39,7 @@ export class WriteFs{
 		// walk up all proxies
 		let walk= target
 		while( walk&& walk._prox){
-			paths.push( walk._prox.parentKey)
+			paths.push( walk._prox.parentKey|| "")
 			walk= walk._prox.parent
 		}
 		paths.push( prop)
