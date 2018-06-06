@@ -30,29 +30,52 @@ export class WriteFs{
 			return exec.next()
 		}
 
+		// queue a write
+		const path= self.pathFor( target, prop)
+		self.writeFile( path, val)
+		// continue
+		exec.next()
+	}
+	pathFor( target, prop){
 		const
 		  paths= [],
-		  localPath= self.localPath!== undefined? self.localPath: exec.prox.localPath
-		if( localPath){
-			paths.push( localPath)
+		  rootPath= this.localPath
+		if( rootPath){
+			// this plugin has a specific path set for itself, nothing else required
+			paths.push( rootPath)
+		}else{
+			// otherwise walk prox's getting names until one of them has a localPath
+			// walk up all proxies
+			let walk= target&& target._prox
+			while( walk){
+				if( walk.localPath){
+					paths.unshift( walk.localPath)
+					// localPath means end of iteration:
+					break
+				}
+
+				// add our property namee here
+				const parentKey= walk.parentKey
+				if( !parentKey){
+					throw new Error("could not calculate write-fs path")
+				}
+				paths.push( parentKey)
+
+				// walk up
+				walk= walk.parent
+			}
 		}
-		// walk up all proxies
-		let walk= target
-		while( walk&& walk._prox){
-			paths.push( walk._prox.parentKey|| "")
-			walk= walk._prox.parent
+
+		// add optional prop
+		if( prop!== undefined){
+			paths.push( prop)
 		}
-		paths.push( prop)
 
 		// replace ~ with HOME
 		if( paths[ 0]&& paths[0][0]=== "~"&& process.env.HOME){
 			paths[ 0]= process.env.HOME+ paths[0].substr( 1)
 		}
-		const path= resolve( ...paths)
-
-		// queue a write on the tail
-		self.writeFile( path, val)
-		exec.next()
+		return resolve( ...paths)
 	}
 	writeFile( path, val){
 		this.tail= this.tail.then( writeFile.bind(null, path, val))
