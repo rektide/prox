@@ -18,7 +18,7 @@ export function setAggro( ctx){
 	}
 	const
 	  plugins= parentProx.aggroPlugins|| parentProx.plugins,
-	  proxied= Prox.make( val, { plugins})
+	  proxied= Prox.make( val, { plugins}) // the aggro plugin will recursively apply itself here
 	proxied._prox.parent= ctx.prox
 	proxied._prox.parentKey= ctx.args[ 1]
 
@@ -39,6 +39,9 @@ export const aggro= {
 		}
 	},
 	install: function( prox){
+		// each prox instance will run this code when aggro is installed,
+		// triggering setAggro on each of it's properties
+		// this recursively insures all children get aggroed
 		for( var key in prox.obj){
 			prox.proxied[ key]= prox.proxied[ key]
 		}

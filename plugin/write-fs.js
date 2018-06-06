@@ -18,21 +18,21 @@ export class WriteFs{
 	}
 	set( exec){
 		const
-		  self= exec.pluginState,
+		  self= exec.pluginState, // chainEval has notes on this
 		  target= exec.prox.proxied, // arg's target is the unproxied object
 		  [ _, prop, val ]= exec.args,
 		  t= typeof( val)
 
 		// assert this is a primitive
-		if( t!== "string"&& t!== "number"){
-			// TODO: crawl this value
-			//console.log("TODO COMPLEX OBJECT")
+		if( t=== "string"|| t=== "number"){
+			// queue a write of this primitive
+			const path= self.pathFor( target, prop)
+			self.writeFile( path, val)
 			return exec.next()
+		}else{
+			// TODO: crawl this value
 		}
 
-		// queue a write
-		const path= self.pathFor( target, prop)
-		self.writeFile( path, val)
 		// continue
 		exec.next()
 	}
