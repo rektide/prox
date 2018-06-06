@@ -51,10 +51,11 @@ export class WriteFs{
 		const path= resolve( ...paths)
 
 		// queue a write on the tail
-		exec.pluginState.tail= exec.pluginState.tail.then(function(){
-			return writeFile( path, val)
-		})
+		self.writeFile( path, val)
 		exec.next()
+	}
+	writeFile( path, val){
+		this.tail= this.tail.then( writeFile.bind(null, path, val))
 	}
 }
 WriteFs.prototype.set.phase= "postrun"
