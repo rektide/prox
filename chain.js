@@ -3,18 +3,34 @@ export const
   * List of phases, in the order they are run
   */
   phases= [ "prerun", "run", "postrun"],
+  // each step of the chain is an object with two property symbols:
   /**
-  * Store the handler with this symbol
+  * property symbol for a handler function for this step in the chain
   */
   handlerSymbol= Symbol("handler"),
   /**
-  * Store the symbol prox allocates per-plugin-instance with this symbol
+  * property symbol for a unique symbol for this step in the chain, used to store the chain step's state.
   */
-  symbolSymbol= Symbol("symbol") // TODO: "instanceSymbol"? "pluginInstanceSymbol"? "pluginStateSymbol"?
+  pluginStateSymbol= Symbol("pluginState")
 
-export function chainEval( el){
-	this.symbol= this.prox[ el[ symbolSymbol]]
-	return el[ handlerSymbol]( this)
+/**
+* @this - a command-chain `exec`
+*/
+export function chainEval( step){
+	// find the step's plugin state symbol & retrieve symbol from the prox
+	const
+	  symbol= step[ pluginStateSymbol],
+	  pluginState= this.prox[ symbol]
+	// each chain step will update `exec`'s `.pluginState` as the chain executes
+	this.pluginState = pluginState
+
+	// Originally I'd intended to .call() with the pluginState but:
+	// a. i'm happy passing via `.symbol` so this is semi-redundant
+	// b. i'm a little nervous .call() will have some minor performance impacts
+	// c. i don't want to block someone who wants to .bind() their handler in some creative manner! for now i leave the use of `this` free.
+	//return step[ handlerSymbol].call( this.symbol, this)
+
+	return step[ handlerSymbol]( this)
 }
 
 export class Chain extends Array{
@@ -27,8 +43,8 @@ export class Chain extends Array{
 	static get handlerSymbol(){
 		return handlerSymbol
 	}
-	static get symbolSymbol(){
-		return symbolSymbol
+	static get pluginStateSymbol(){
+		return pluginStateSymbol
 	}
 	static get chainEval(){
 		return chainEval
@@ -70,12 +86,15 @@ export class Chain extends Array{
 			return
 		}
 		if( phase=== undefined){
+			// handler can specify phase or default to "run"
 			phase= handler.phase|| "run"
 		}
-		const els= this[ phase]|| (this[ phase]= [])
-		els.push({
+		// retrieve or create the array of steps for this phase
+		const steps= this[ phase]|| (this[ phase]= [])
+		// add our new step
+		steps.push({
 			[handlerSymbol]: handler, // the handler
-			[symbolSymbol]: symbol // the symbol to retrieve the handlers state with
+			[pluginStateSymbol]: symbol // the symbol to retrieve the handlers state with
 		})
 	}
 	uninstall( handler, symbol, phase){
@@ -86,14 +105,14 @@ export class Chain extends Array{
 		if( phase=== undefined){
 			phase= handler.phase|| "run"
 		}
-		const els= this[ phase]
-		if( !els){
+		const steps= this[ phase]
+		if( !steps){
 			return false
 		}
-		for( let i in els){
-			const el= els[ i]
-			if( el[ handlerSymbol]=== handler&& el[ symbolSymbol]=== symbol){
-				els.splice( i, 1)
+		for( let i in steps){
+			const step= steps[ i]
+			if( step[ handlerSymbol]=== handler&& (!symbol || step[ pluginStateSymbol]=== symbol)){
+				steps.splice( i, 1)
 				return true
 			}
 		}
