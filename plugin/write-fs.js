@@ -42,13 +42,13 @@ export class WriteFs{
 			paths.push( walk._prox.parentKey)
 			walk= walk._prox.parent
 		}
+		paths.push( prop)
 
 		// replace ~ with HOME
 		if( paths[ 0]&& paths[0][0]=== "~"&& process.env.HOME){
-			//console.log("REPLACE", paths[0])
 			paths[ 0]= process.env.HOME+ paths[0].substr( 1)
 		}
-		const path= resolve.apply( paths)
+		const path= resolve( ...paths)
 
 		// queue a write on the tail
 		exec.pluginState.tail= exec.pluginState.tail.then(function(){
