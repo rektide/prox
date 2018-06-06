@@ -16,38 +16,45 @@ export class WriteFs{
 		this.symbol= symbol // why would we need this? chain looks up our state.
 		this.tail= Promise.resolve()
 	}
-	set( ctx){
+	set( exec){
 		const
-		  val= ctx.args[ 2],
+		  self= exec.pluginState,
+		  target= exec.prox.proxied, // arg's target is the unproxied object
+		  [ _, prop, val ]= exec.args,
 		  t= typeof( val)
+
 		// assert this is a primitive
 		if( t!== "string"&& t!== "number"){
-			return ctx.next()
+			// TODO: crawl this value
+			//console.log("TODO COMPLEX OBJECT")
+			return exec.next()
 		}
-		
+
 		const
 		  paths= [],
-		  localPath= this.localPath!== undefined? this.localPath: ctx.prox.localPath
+		  localPath= self.localPath!== undefined? self.localPath: exec.prox.localPath
 		if( localPath){
 			paths.push( localPath)
 		}
 		// walk up all proxies
-		let walk= val
-		while( walk._prox){
+		let walk= target
+		while( walk&& walk._prox){
 			paths.push( walk._prox.parentKey)
 			walk= walk._prox.parent
 		}
+
 		// replace ~ with HOME
 		if( paths[ 0]&& paths[0][0]=== "~"&& process.env.HOME){
+			//console.log("REPLACE", paths[0])
 			paths[ 0]= process.env.HOME+ paths[0].substr( 1)
 		}
 		const path= resolve.apply( paths)
 
 		// queue a write on the tail
-		ctx.symbol.tail= ctx.symbol.tail.then(function(){
+		exec.pluginState.tail= exec.pluginState.tail.then(function(){
 			return writeFile( path, val)
 		})
-		ctx.next()
+		exec.next()
 	}
 }
 WriteFs.prototype.set.phase= "postrun"
