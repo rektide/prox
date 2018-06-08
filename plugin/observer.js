@@ -1,3 +1,4 @@
+import { stepState } from "../chain"
 
 // ["add", "update", "delete", "reconfigure", "setPrototype", "preventExtensions"]
 
@@ -5,15 +6,18 @@ export class Observer{
 	get phases(){
 		return {
 			run: {
-				set: this.setObserver,
-				deleteProperty: this.deletePropertyObserver,
-				defineProperty: this.definePropertyObserver,
-				setPrototypeOf: this.setPrototypeOfObserver,
-				preventExtensions: this.preventExtensionsObserver
+				setObserver: this.setObserver,
+				deletePropertyObserver: this.deletePropertyObserver,
+				definePropertyObserver: this.definePropertyObserver,
+				setPrototypeOfObserver: this.setPrototypeOfObserver,
+				preventExtensionsObserver: this.preventExtensionsObserver
 			}
 		}
 	}
 	setObserver( exec){
+		const self= stepState( exec)
+		
+		
 		const obs= exec.prox[ exec.symbol]
 		
 		// name, object, type, oldValue

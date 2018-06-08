@@ -1,6 +1,6 @@
 import tape from "tape"
 import prox from ".."
-import { handlerSymbol, pluginStateSymbol } from "../chain"
+import { stepHandlerSymbol, stepStateSymbol } from "../chain"
 
 function doubleOutput( exec){
 	const val= exec.args[2]
@@ -45,8 +45,8 @@ tape("directly fiddle a .set trap", function(t){
 	  o= prox.make(underlying),
 	  // prox's `addPlugin` normally creates this:
 	  doubleOutputHandler= {
-		[handlerSymbol]: doubleOutput,
-		[pluginStateSymbol]: Symbol("direct-fiddle")
+		[stepHandlerSymbol]: doubleOutput,
+		[stepStateSymbol]: Symbol("direct-fiddle")
 	  }
 
 	// base case

@@ -7,42 +7,41 @@ export const
   /**
   * property symbol for a handler function for this step in the chain
   */
-  handlerSymbol= Symbol("handler"),
+  stepHandlerSymbol= Symbol("stepHandler"),
   /**
   * property symbol for a unique symbol for this step in the chain, used to store the chain step's state.
   */
-  pluginStateSymbol= Symbol("pluginState")
+  stepStateSymbol= Symbol("stepState"),
+  /**
+  * used by an `exec` to store the current step's unique stepStateSymbol.
+  */
+  stepStateSymbolSymbol= Symbol("stepStateSymbolSymbol")
+
+/**
+* Helper for steps to get their state with
+*/
+export function stepState( exec){
+	// find the step's plugin state symbol & retrieve symbol from the prox
+	const
+	  stepStateSymbol= exec[ stepStateSymbolSymbol],
+	  state= exec.prox[ stepStateSymbol]
+	return state
+}
 
 /**
 * @this - a command-chain `exec`
 */
 export function chainEval( step){
-	//// find the step's plugin state symbol & retrieve symbol from the prox
-	//const
-	//  symbol= step[ pluginStateSymbol],
-	//  pluginState= this.prox[ symbol]
-	//// each chain step will update `exec`'s `.pluginState` as the chain executes
-	//this.pluginState = pluginState
-
-	// Originally I'd intended to .call() with the pluginState but:
+	// Originally I'd intended to .call() with the stepState but:
 	// a. i'm happy passing via `.symbol` so this is semi-redundant
 	// b. i'm a little nervous .call() will have some minor performance impacts
 	// c. i don't want to block someone who wants to .bind() their handler in some creative manner! for now i leave the use of `this` free.
-	//return step[ handlerSymbol].call( this.symbol, this)
+	//return step[ stepHandlerSymbol].call( this.symbol, this)
 
-	return step[ handlerSymbol]( this)
-}
-
-/**
-* Helper for plugins to get their state with
-*/
-export function pluginState( step){
-	//// find the step's plugin state symbol & retrieve symbol from the prox
-	const
-	  symbol= step[ pluginStateSymbol],
-	  pluginState= this.prox[ symbol]
-	// each chain step will update `exec`'s `.pluginState` as the chain executes
-	return pluginState
+	this[ stepStateSymbolSymbol]= step[ stepStateSymbol]
+	// many plugins could well not need state passed to them, so don't waste the lookup: call stepState helper if needed.
+	// this[ stepStateSymbol]= this.prox[ this[ stepStateSymbolSymbol]]
+	return step[ stepHandlerSymbol]( this)
 }
 
 export class Chain extends Array{
@@ -52,11 +51,11 @@ export class Chain extends Array{
 	static set phases(v){
 		phases.splice( 0, phases.length, ...v)
 	}
-	static get handlerSymbol(){
-		return handlerSymbol
+	static get stepHandlerSymbol(){
+		return stepHandlerSymbol
 	}
-	static get pluginStateSymbol(){
-		return pluginStateSymbol
+	static get stepStateSymbol(){
+		return stepStateSymbol
 	}
 	static get chainEval(){
 		return chainEval
@@ -72,17 +71,10 @@ export class Chain extends Array{
 			phaseName,
 			phaseSteps: this[ phaseName],
 			stepNum: 0,
+			stepState: undefined,
 			next: function(){
-				const report= (v)=>{
-					console.log({
-						phaseName: this.phaseName,
-						stepNum: this.stepNum
-					})
-				}
-				report("start")
 				let step= this.step= this.phaseSteps&& this.phaseSteps[ this.stepNum++]
 				while( !step){ // advance to next phase
-					report("while")
 					if( this.phaseNum>= phases.length){
 						return {
 							done: true
@@ -115,8 +107,8 @@ export class Chain extends Array{
 		const steps= this[ phase]|| (this[ phase]= [])
 		// add our new step
 		steps.push({
-			[handlerSymbol]: handler, // the handler
-			[pluginStateSymbol]: symbol // the symbol to retrieve the handlers state with
+			[stepHandlerSymbol]: handler, // the handler
+			[stepStateSymbol]: symbol // the symbol to retrieve the handlers state with
 		})
 	}
 	uninstall( handler, symbol, phase){
@@ -133,7 +125,7 @@ export class Chain extends Array{
 		}
 		for( let i in steps){
 			const step= steps[ i]
-			if( step[ handlerSymbol]=== handler&& (!symbol || step[ pluginStateSymbol]=== symbol)){
+			if( step[ stepHandlerSymbol]=== handler&& (!symbol || step[ stepStateSymbol]=== symbol)){
 				steps.splice( i, 1)
 				return true
 			}

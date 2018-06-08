@@ -30,4 +30,5 @@ tape( "object field gets written", function( t){
 })
 
 tape( "array field gets written", function( t){
+	t.end()
 })

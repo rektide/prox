@@ -1,5 +1,5 @@
 import tape from "tape"
-import Chain from "../chain"
+import Chain, { stepHandlerSymbol } from "../chain"
 
 tape("can install a single handler", function(t){
 	t.plan( 1)
@@ -8,7 +8,7 @@ tape("can install a single handler", function(t){
 	  symbol = Symbol()
 	chain.install(()=> t.pass( "run handler"), symbol, "run")
 	for( const el of chain){
-		el[ Chain.handlerSymbol]()
+		el[ stepHandlerSymbol]()
 	}
 	t.end()
 })
@@ -22,7 +22,7 @@ tape("can install multiple handlers", function(t){
 	chain.install(()=> t.pass( "run handler 2"), symbol, "run")
 	chain.install(()=> t.pass( "run handler 3"), symbol, "run")
 	for( const el of chain){
-		el[ Chain.handlerSymbol]()
+		el[ stepHandlerSymbol]()
 	}
 	t.end()
 })
@@ -35,12 +35,12 @@ tape("can install & uninstall a handler", function(t){
 	  handler= ()=> t.pass("run handler")
 	chain.install(handler, symbol, "run")
 	for( const el of chain){
-		el[ Chain.handlerSymbol]()
+		el[ stepHandlerSymbol]()
 	}
 	chain.uninstall(handler, symbol, "run")
 	for( const el of chain){
 		// there should be no elements
-		el[ Chain.handlerSymbol]()
+		el[ stepHandlerSymbol]()
 	}
 	t.end()
 })
@@ -55,11 +55,11 @@ tape("can install multiple & uninstall a handler", function(t){
 	chain.install(handler1, symbol, "run")
 	chain.install(handler2, symbol, "run")
 	for( const el of chain){
-		el[ Chain.handlerSymbol]()
+		el[ stepHandlerSymbol]()
 	}
 	chain.uninstall(handler2, symbol, "run")
 	for( const el of chain){
-		el[ Chain.handlerSymbol]()
+		el[ stepHandlerSymbol]()
 	}
 	t.end()
 })
@@ -75,7 +75,7 @@ tape("handlers run in their phase order", function(t){
 	chain.install(()=> t.equal(++step, 3, "run"), symbol, "run")
 	chain.install(()=> t.equal(++step, 1, "prerun"), symbol, "prerun")
 	for( const el of chain){
-		el[ Chain.handlerSymbol]()
+		el[ stepHandlerSymbol]()
 	}
 	t.end()
 })

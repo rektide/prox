@@ -1,6 +1,8 @@
 import { writeFile as WriteFile } from "fs"
 import { resolve } from "path"
 import { promisify } from "util"
+import { stepState } from "../chain"
+//import { serialize } from "caminus"
 
 const writeFile= promisify( WriteFile)
 

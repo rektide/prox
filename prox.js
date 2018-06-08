@@ -1,6 +1,6 @@
 import cc from "command-chain"
 
-import Chain from "./chain"
+import Chain, { chainEval } from "./chain"
 import { chainSymbols } from "./constants"
 import reflect from "./plugin/reflect"
 import propProx from "./plugin/prop-prox"
@@ -42,7 +42,7 @@ export class Prox{
 				chain: chainLookup(this, chainSymbol),
 				method, // which event on the proxy is firing
 				args,
-				eval: Chain.chainEval
+				eval: chainEval
 			})
 			return val
 		}
@@ -155,6 +155,7 @@ export class Prox{
 		if( this[ contextSymbol]){
 			this._addPhases( this[ contextSymbol].phases, contextSymbol)
 		}
+		return contextSymbol
 	}
 	/**
 	* typically users ought to addPlugin, but this underlying method allows directly adding handlers
