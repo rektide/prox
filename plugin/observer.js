@@ -13,16 +13,18 @@ export class Observer{
 			}
 		}
 	}
-	setObserver( ctx){
+	setObserver( exec){
+		const obs= exec.prox[ exec.symbol]
+		
 		// name, object, type, oldValue
 	}
-	deletePropertyObserver( ctx){
+	deletePropertyObserver( exec){
 	}
-	definePropertyObserver( ctx){
+	definePropertyObserver( exec){
 	}
-	setPrototypeOfObserver( ctx){
+	setPrototypeOfObserver( exec){
 	}
-	preventExtensionsObserver( ctx){
+	preventExtensionsObserver( exec){
 	}
 
 	// operator friendly, non-suffixed aliases
