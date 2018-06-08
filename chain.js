@@ -17,12 +17,12 @@ export const
 * @this - a command-chain `exec`
 */
 export function chainEval( step){
-	// find the step's plugin state symbol & retrieve symbol from the prox
-	const
-	  symbol= step[ pluginStateSymbol],
-	  pluginState= this.prox[ symbol]
-	// each chain step will update `exec`'s `.pluginState` as the chain executes
-	this.pluginState = pluginState
+	//// find the step's plugin state symbol & retrieve symbol from the prox
+	//const
+	//  symbol= step[ pluginStateSymbol],
+	//  pluginState= this.prox[ symbol]
+	//// each chain step will update `exec`'s `.pluginState` as the chain executes
+	//this.pluginState = pluginState
 
 	// Originally I'd intended to .call() with the pluginState but:
 	// a. i'm happy passing via `.symbol` so this is semi-redundant
@@ -31,6 +31,18 @@ export function chainEval( step){
 	//return step[ handlerSymbol].call( this.symbol, this)
 
 	return step[ handlerSymbol]( this)
+}
+
+/**
+* Helper for plugins to get their state with
+*/
+export function pluginState( step){
+	//// find the step's plugin state symbol & retrieve symbol from the prox
+	const
+	  symbol= step[ pluginStateSymbol],
+	  pluginState= this.prox[ symbol]
+	// each chain step will update `exec`'s `.pluginState` as the chain executes
+	return pluginState
 }
 
 export class Chain extends Array{
@@ -53,27 +65,37 @@ export class Chain extends Array{
 		super()
 	}
 	[Symbol.iterator](){
+		const phaseName= phases[ 0]
 		return {
 			chain: this,
-			phase: 0,
-			pos: 0,
+			phaseNum: 0,
+			phaseName,
+			phaseSteps: this[ phaseName],
+			stepNum: 0,
 			next: function(){
-				if( this.phase>= phases.length){
-					return {
-						done: true
+				const report= (v)=>{
+					console.log({
+						phaseName: this.phaseName,
+						stepNum: this.stepNum
+					})
+				}
+				report("start")
+				let step= this.step= this.phaseSteps&& this.phaseSteps[ this.stepNum++]
+				while( !step){ // advance to next phase
+					report("while")
+					if( this.phaseNum>= phases.length){
+						return {
+							done: true
+						}
 					}
+					++this.phaseNum
+					const phaseName= this.phaseName= phases[ this.phaseNum]
+					this.phaseSteps= this.chain[ phaseName]
+					this.stepNum= 0
+					step= this.step= this.phaseSteps&& this.phaseSteps[ this.stepNum++]
 				}
-				const
-				  phaseName= phases[ this.phase],
-				  phase= this.chain[ phaseName]
-				if( !phase|| this.pos>= phase.length){
-					++this.phase
-					this.pos= 0
-					return this.next()
-				}
-				const value= phase[ this.pos++]
 				return {
-					value,
+					value: step,
 					done: false
 				}
 			}
