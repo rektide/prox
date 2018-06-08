@@ -1,13 +1,13 @@
 import tape from "tape"
 import prox from ".."
-import { handlerSymbol, symbolSymbol } from "../chain"
+import { handlerSymbol, pluginStateSymbol } from "../chain"
 
-function doubleOutput( ctx){
-	const val= ctx.args[2]
+function doubleOutput( exec){
+	const val= exec.args[2]
 	if ( !isNaN( val)){
-		ctx.args[2]*= 2
+		exec.args[2]*= 2
 	}
-	ctx.next()
+	exec.next()
 }
 
 tape("install a double plugin", function(t){
@@ -46,7 +46,7 @@ tape("directly fiddle a .set trap", function(t){
 	  // prox's `addPlugin` normally creates this:
 	  doubleOutputHandler= {
 		[handlerSymbol]: doubleOutput,
-		[symbolSymbol]: Symbol("direct-fiddle")
+		[pluginStateSymbol]: Symbol("direct-fiddle")
 	  }
 
 	// base case
@@ -80,8 +80,8 @@ tape("directly fiddle a .set trap", function(t){
 
 
 var doublePlugin= {
-	set(ctx){
-		doubleOutput(ctx)
+	set( exec){
+		doubleOutput( exec)
 	},
 	install( prox){
 		prox.chain("set").install( doublePlugin.set)
