@@ -1,8 +1,8 @@
-export function getPropProx( ctx){
-	if( ctx.args[1]=== "_prox"){
-		ctx.output= ctx.prox
+export function getPropProx( exec){
+	if( exec.args[1]=== "_prox"){
+		exec.output= exec.prox
 	}
-	ctx.next()
+	exec.next()
 }
 getPropProx.phase= "postrun"
 

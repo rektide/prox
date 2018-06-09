@@ -1,9 +1,11 @@
+// global things
 export const
   /**
   * List of phases, in the order they are run
   */
   phases= [ "prerun", "run", "postrun"],
-  // each step of the chain is an object with two property symbols:
+// symbols for each `step` of the chain:
+export const
   /**
   * property symbol for a handler function for this step in the chain
   */
@@ -11,10 +13,35 @@ export const
   /**
   * property symbol for a unique symbol for this step in the chain, used to store the chain step's state.
   */
-  stepStateSymbol= Symbol("stepState"),
+  stepStateSymbol= Symbol("stepState")
+// iterator symbols:
+export const
   /**
-  * used by an `exec` to store the current step's unique stepStateSymbol.
+  * The chain being iterated on.
   */
+  chainSymbol= Symbol("chainSymbol"),
+  /**
+  * The phase number of the iterator.
+  */
+  phaseNumSymbol= Symbol("phaseNum"),
+  /**
+  * Derived from phaseNumSymbol, phaseNameSymbol holds the textual name of the current phase
+  */
+  phaseNameSymbol= Symbol("phaseNamesymbol"),
+  /**
+  * Derived from phaseNumSymbol, phaseStepsSymbol holds the collection of the current phases's steps
+  */
+  phaseStepsSymbol= Symbol("phaseSteps"),
+  /**
+  * Which step in the current phase the iterator is on.
+  */
+  stepNumSymbol= Symbol("stepNum"),
+  /**
+  * The current step is also stored on the iterator? Why?
+  */
+  stepSymbol= Symbol("step"),
+// exec symbols:
+const
   stepStateSymbolSymbol= Symbol("stepStateSymbolSymbol")
 
 /**
@@ -32,15 +59,19 @@ export function stepState( exec){
 * @this - a command-chain `exec`
 */
 export function chainEval( step){
+	// save the step's unique symbol
+	this[ stepStateSymbolSymbol]= step[ stepStateSymbol]
+
+	// many plugins could well not need state passed to them, so don't waste the lookup: call stepState helper if needed.
+	// this[ stepStateSymbol]= this.prox[ this[ stepStateSymbolSymbol]]
+
 	// Originally I'd intended to .call() with the stepState but:
 	// a. i'm happy passing via `.symbol` so this is semi-redundant
 	// b. i'm a little nervous .call() will have some minor performance impacts
 	// c. i don't want to block someone who wants to .bind() their handler in some creative manner! for now i leave the use of `this` free.
 	//return step[ stepHandlerSymbol].call( this.symbol, this)
 
-	this[ stepStateSymbolSymbol]= step[ stepStateSymbol]
-	// many plugins could well not need state passed to them, so don't waste the lookup: call stepState helper if needed.
-	// this[ stepStateSymbol]= this.prox[ this[ stepStateSymbolSymbol]]
+	// get the handler of this step & call it
 	return step[ stepHandlerSymbol]( this)
 }
 
@@ -60,31 +91,49 @@ export class Chain extends Array{
 	static get chainEval(){
 		return chainEval
 	}
+	/**
+	* An iterator's `phaseNameSymbol` and `phaseStepsSymbol` are derived from `phaseNumSymbol. Recalculate them.
+	*/
+	static recalcIterator( iter){
+		const
+		  phaseNum= iter[ phaseNumSymbol],
+		  phaseName= iter[ phaseNameSymbol]= phases[ phaseNum],
+		  chain= iter[ chainSymbol]
+		iter[ phaseStepsSymbol]= chain[ phaseName]
+	}
 	constructor(){
 		super()
 	}
+	/**
+	* Create an iterator for the Chain, which will use `phaseNumSymbol` and `stepNumSymbol` to iterate through each phase, and each step in each phase.
+	*/
 	[Symbol.iterator](){
-		const phaseName= phases[ 0]
+		const initPhaseName= phases[ 0]
 		return {
-			chain: this,
-			phaseNum: 0,
-			phaseName,
-			phaseSteps: this[ phaseName],
-			stepNum: 0,
-			stepState: undefined,
+			[chainSymbol]: this,
+			[phaseNumSymbol]: 0,
+			[phaseNameSymbol]: initPhaseName,
+			[phaseStepsSymbol]: this[ initPhaseName],
+			[stepNumSymbol]: 0,
+			/**
+			* @this - exec
+			*/
 			next: function(){
-				let step= this.step= this.phaseSteps&& this.phaseSteps[ this.stepNum++]
+				let
+				  phaseSteps= this[ phaseStepsSymbol],
+				  stepNum= this[ stepNumSymbol]++,
+				  step= this[ stepSymbol]= phaseSteps&& phaseSteps[ stepNum]
 				while( !step){ // advance to next phase
-					if( this.phaseNum>= phases.length){
+					let phaseNum= ++this[ phaseNumSymbol]
+					if( phaseNum> phases.length){
 						return {
 							done: true
 						}
 					}
-					++this.phaseNum
-					const phaseName= this.phaseName= phases[ this.phaseNum]
-					this.phaseSteps= this.chain[ phaseName]
-					this.stepNum= 0
-					step= this.step= this.phaseSteps&& this.phaseSteps[ this.stepNum++]
+					const phaseName= this[ phaseNameSymbol]= phases[ phaseNum]
+					phaseSteps= this[ phaseStepsSymbol]= this[ chainSymbol][ phaseName]
+					this[ stepNumSymbol]= 1 // increment past step 0, which we're doing now
+					step= this[ stepSymbol]= phaseSteps&& phaseSteps[ 0]
 				}
 				return {
 					value: step,
@@ -92,7 +141,6 @@ export class Chain extends Array{
 				}
 			}
 		}
-		return iterator
 	}
 	install( handler, symbol, phase){
 		// find phase

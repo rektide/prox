@@ -5,8 +5,9 @@ tape("can install a single handler", function(t){
 	t.plan( 1)
 	const
 	  chain= new Chain(),
-	  symbol = Symbol()
-	chain.install(()=> t.pass( "run handler"), symbol, "run")
+	  symbol = Symbol(),
+	  singleHandler= ()=> {console.log("go");t.pass( "run handler")}
+	chain.install( singleHandler, symbol, "run")
 	for( const el of chain){
 		el[ stepHandlerSymbol]()
 	}

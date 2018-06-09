@@ -11,9 +11,9 @@ export function makeHandler( method){
 	  name = method + "Reflect",
 	  // this hack lets us, via inference, dynamically pick a friendly function name
 	  tmp= {
-		[ name]: function( ctx){
-			ctx.output= reflected( ...ctx.args) // run, save `output`
-			ctx.next() // run everything
+		[ name]: function( exec){
+			exec.output= reflected( ...exec.args) // run, save `output`
+			exec.next() // run everything
 		}
 	  }
 	tmp[ name].phase= "run"
