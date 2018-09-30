@@ -16,10 +16,11 @@
 		"url": "https://github.com/rektide/prox/issues"
 	},
 	"dependencies": {
-		"command-chain": "^66.0.0"
+		"phased-middleware": "^1.0.0"
 	},
 	"devDependencies": {
-		"esm": "^3.0.29",
+		"esm": "^3.0.82",
+		"rimraf": "^2.6.2",
 		"tape": "^4.9.0"
 	}
 }
