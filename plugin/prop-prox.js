@@ -1,18 +1,17 @@
-export function getPropProx( exec){
-	if( exec.args[1]=== "_prox"){
-		exec.output= exec.prox
-	}
-	exec.next()
-}
-getPropProx.phase= "postrun"
-
-export const propProx= {
-	phases: {
-		postrun: {
-			getPropProx
+export function makePropProx( propertyName= "_prox"){
+	function getPropProx( context){
+		if( context.inputs[ 0]=== "_prox"){
+			setOutput( context.phasedMiddleware) // return the prox
+			context.position= context.phasedRun.length // terminate
 		}
-	},
-	name: "propProx"
+	}
+	getPropProx.phase= {pipeline: "get", phase: "prerun"}
+	return {
+		name: "prop-prox",
+		get: getPropProx
+	}
 }
+
+export const propProx= makePropProx()
 
 export default propProx
