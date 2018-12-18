@@ -1,8 +1,7 @@
 import { writeFile as WriteFile } from "fs"
 import { resolve } from "path"
 import { promisify } from "util"
-import { stepState } from "../chain"
-//import { serialize } from "caminus"
+import serialize from "caminus/serialize"
 
 const writeFile= promisify( WriteFile)
 
@@ -20,19 +19,23 @@ export class WriteFs{
 	}
 	set( exec){
 		const
-		  self= exec.pluginState, // chainEval has notes on this
+		  self= stepState( exec),
 		  target= exec.prox.proxied, // arg's target is the unproxied object
 		  [ _, prop, val ]= exec.args,
 		  t= typeof( val)
 
+		const path= self.pathFor( target, prop)
 		// assert this is a primitive
 		if( t=== "string"|| t=== "number"){
 			// queue a write of this primitive
-			const path= self.pathFor( target, prop)
 			self.writeFile( path, val)
 			return exec.next()
 		}else{
-			// TODO: crawl this value
+			// aggro should 
+			const basePath= self.pathFor( target)
+			for( var i of val){
+				
+			}
 		}
 
 		// continue
