@@ -32,7 +32,7 @@ export class Prox extends PhasedMiddleware{
 }
 pipelineNames.forEach( method=> {
 	Prox.prototype[ method]= function( ...args){
-		return this.exec( method, null, args)
+		return this.exec( method, null, args).output
 	}
 })
 export default Prox
