@@ -1,6 +1,6 @@
 import _reflect from "./util/reflect.js"
 
-export const phases= ["prerun", "run", "postrun"]
+export const phases= ["run"]
 
 export const pipelineNames= Object.getOwnPropertyNames( _reflect)
 
