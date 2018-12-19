@@ -26,35 +26,14 @@ export function setAggro( ctx){
 	ctx.args[ 2]= proxied
 	ctx.next()
 }
-setAggro.phase= "prerun"
+setAggro.phase= {pipeline: "set", phase: "prerun"}
 
 /**
 * Aggro plugin will, whenever an object is assigned, insure that that object is wrapped in a prox
 * Additionally, aggro attaches the parent & parentKey to the new prox, that point to the aggro prox & the key where it was set.
 */
 export const aggro= {
-	phases: {
-		prerun: {
-			setAggro
-		}
-	},
-	install: function( prox){
-		// each prox instance will run this code when aggro is installed,
-		// triggering setAggro on each of it's properties
-		// this recursively insures all children get aggroed
-		for( var key in prox.obj){
-			prox.proxied[ key]= prox.proxied[ key]
-		}
-	},
-	uninstall: function( prox){
-		for( var key in prox.obj){
-			const proxed= prox.obj[ key]
-			if( !( proxed|| proxed._prox)){
-				continue
-			}
-			prox.proxied[ key]= prox.proxied[ key]._prox.obj
-		}
-	},
+	set: setAggro,
 	name: "aggro"
 }
 

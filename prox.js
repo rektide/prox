@@ -1,11 +1,8 @@
 import PhasedMiddleware from "phased-middleware"
 import { pipelines, pipelineNames} from "./pipeline.js"
-import defaults from "./defaults.js"
-
-export const basePlugins = [ reflect, propProx]
+import { defaults, defaulter } from "./defaults.js"
 
 let _id= 0
-
 
 /**
 * prox is a proxy 'handler' instance, pointing to a specific obj
@@ -19,8 +16,8 @@ export class Prox extends PhasedMiddleware{
 		return p.proxied
 	}
 
-	constructor( obj, { pipelines, middlewares, name}= defaults){
-		super({ pipelines, middlewares, name})
+	constructor( obj, opts= defaults){
+		super( defaulter( opts))
 		Object.defineProperties( this, {
 			// create proxyied object that we are the handler for
 			proxied: {
