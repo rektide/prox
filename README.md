@@ -1,9 +1,17 @@
 # prox
 
-> prox is a runtime instrumentation engine for javascript objects, providing hooks to interrogate, interrupt, and extend normal object behavior.
+> Advanced, modular JavaScript proxies & persistence
 
-By default prox does nothing: it creates a transparent proxy of an object that appears like the object. This is good. All operations
-  get to the underlying object because there are no command chains associated with any object events: these chains live in the proxy
-  yet are exposed to permit runtime instrumentation of objects.
+Prox provides:
+1. A modular, plugin based system for creating JavaScript objects with advanced behavior (via proxies).
+2. An object persistence system for serializing and deserializing JavaScript objects into a directory structure
+
+## Modular, plugins based proxies
+
+
+
+## Object Persistence
+
+
 
 # Usage
