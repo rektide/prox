@@ -4,6 +4,17 @@ import { defaults, defaulter } from "./defaults.js"
 
 let _id= 0
 
+
+function makeProxyHandlers( prox){
+	const handlers= {}
+	pipelineNames.forEach( method=> {
+		handlers[ method]= function( ...args){
+			return prox.exec( method, null, args)
+		}
+	})
+	return handlers
+}
+
 /**
 * prox is a proxy 'handler' instance, pointing to a specific obj
 */
@@ -16,12 +27,12 @@ export class Prox extends PhasedMiddleware{
 		return p.proxied
 	}
 
-	constructor( obj, opts= defaults){
+	constructor( obj= {}, opts= defaults){
 		super( defaulter( opts))
 		Object.defineProperties( this, {
 			// create proxyied object that we are the handler for
 			proxied: {
-				value: new Proxy( obj, this)
+				value: new Proxy( obj, makeProxyHandlers( this))
 			},
 			// our target object
 			obj: {
@@ -30,9 +41,4 @@ export class Prox extends PhasedMiddleware{
 		})
 	}
 }
-pipelineNames.forEach( method=> {
-	Prox.prototype[ method]= function( ...args){
-		return this.exec( method, null, args).output
-	}
-})
-export default Prox
+export default Prox.make
