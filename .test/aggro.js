@@ -4,7 +4,7 @@ import aggro from "../plugin/aggro.js"
 import { plugins} from "../defaults.js"
 
 tape("aggro adds prox to child", function(t){
-	const o= prox({}, {plugins: plugins.concat( aggro)})
+	const o= prox({child: "is me"}, {plugins: [...plugins,  aggro]})
 	t.ok( o._prox, "root object has a _prox")
 	o.foo=  {}
 	t.ok( o.foo._prox, "child object has a _prox")
@@ -14,7 +14,7 @@ tape("aggro adds prox to child", function(t){
 })
 
 tape("grandchildren also proxed by aggro", function(t){
-	const o= prox({}, {plugins: plugins.concat( aggro)})
+	const o= prox({}, {plugins: [...plugins, aggro]})
 	t.ok( o._prox, "root object has a `_prox`")
 	o.foo=  {}
 	const grandchild= {}
@@ -24,11 +24,12 @@ tape("grandchildren also proxed by aggro", function(t){
 	t.equal( o.foo.bar._prox.parentKey, "bar", "proxied grandchild knows it's key via `parentKey`")
 	t.error( grandchild._prox, "real grandchild unaffected")
 	t.end()
+	process.exit(1)
 })
 
 tape("child's contents are also proxed", function(t){
 	const
-	  o= prox({}, {plugins: plugins.concat( aggro)}),
+	  o= prox({}, {plugins: [...plugins, aggro]}),
 	  more= {
 		stuff: {},
 		primitive: 42
@@ -43,8 +44,8 @@ tape("child's contents are also proxed", function(t){
 tape("one object can be aggroed by two prox", function(t){
 	const
 	  shared= {},
-	  proxed1= prox({}, {plugins: plugins.concat( aggro)}),
-	  proxed2= prox({}, {plugins: plugins.concat( aggro)})
+	  proxed1= prox({}, {plugins: [plugins, aggro]}),
+	  proxed2= prox({}, {plugins: [plugins, aggro]})
 
 	proxed1.alpha= shared
 	t.error( shared._prox, "original shared object being aggroed is unaffected")
