@@ -1,30 +1,30 @@
 import Prox from "../prox"
+import { $plugins} from "phased-middleware/symbol.js"
 
-export function setAggro( ctx){
-	const val= ctx.args[ 2]
+export function setAggro({ inputs, phasedMiddleware, setOutput} ){
+	const val= inputs[ 2]
 	if( !val){
-		return ctx.next()
+		return
 	}
 	if( Object(val)!== val){
-		return ctx.next()
+		return
 	}
 	const
-	  [ target, key]= ctx.args,
-	  parentProx= ctx.prox,
+	  [ target, key]= inputs,
+	  parentProx= phasedMiddleware,
 	  existingProx= val._prox
 	if( existingProx&& existingProx.parent=== parentProx&& existingProx.parentKey=== key){
 		// object already has a prox with the correct location information
-		return ctx.next()
+		return
 	}
 	const
-	  plugins= parentProx.aggroPlugins|| parentProx.plugins,
-	  proxied= Prox.make( val, { plugins}) // the aggro plugin will recursively apply itself here
-	proxied._prox.parent= ctx.prox
-	proxied._prox.parentKey= ctx.args[ 1]
+	  plugins= parentProx[ $plugins],
+	  proxied= Prox( val, { plugins}) // the aggro plugin will recursively apply itself here
+	proxied._prox.parent= phasedMiddleware
+	proxied._prox.parentKey= key
 
 	// swap in the new proxied object
-	ctx.args[ 2]= proxied
-	ctx.next()
+	setOutput( proxied)
 }
 setAggro.phase= {pipeline: "set", phase: "prerun"}
 
