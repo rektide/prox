@@ -9,7 +9,7 @@ function makeProxyHandlers( prox){
 	const handlers= {}
 	pipelineNames.forEach( method=> {
 		handlers[ method]= function( ...args){
-			return prox.exec( method, null, args)
+			return prox.exec( method, null, ...args)
 		}
 	})
 	return handlers
