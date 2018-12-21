@@ -1,7 +1,7 @@
 export function makePropProx( propertyName= "_prox"){
 	function getPropProx( context){
 		if( context.inputs[ 1]=== "_prox"){
-			setOutput( context.phasedMiddleware) // return the prox
+			context.setOutput( context.phasedMiddleware) // return the prox
 			context.position= context.phasedRun.length // terminate
 		}
 	}
