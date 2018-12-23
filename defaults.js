@@ -4,7 +4,7 @@ import reflect from "./plugin/reflect.js"
 
 export { pipelines }
 
-export const plugins= [ propProx, reflect]
+export const plugins= Object.freeze([ propProx, reflect])
 
 export const defaults= {
 	pipelines,
