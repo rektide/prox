@@ -25,6 +25,7 @@ export function setAggro({ inputs, phasedMiddleware, setOutput} ){
 
 	// swap in the new proxied object
 	setOutput( proxied)
+	inputs[ 2]= proxied
 }
 setAggro.phase= {pipeline: "set", phase: "prerun"}
 

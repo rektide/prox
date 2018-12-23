@@ -42,3 +42,4 @@ export class Prox extends PhasedMiddleware{
 	}
 }
 export default Prox.make
+export const make = Prox.make

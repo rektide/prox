@@ -8,7 +8,7 @@ export const plugins= Object.freeze([ propProx, reflect])
 
 export const defaults= {
 	pipelines,
-	plugins	
+	plugins
 }
 export default defaults
 

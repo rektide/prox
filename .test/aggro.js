@@ -4,9 +4,9 @@ import aggro from "../plugin/aggro.js"
 import { plugins} from "../defaults.js"
 
 tape("aggro adds prox to child", function(t){
-	const o= prox({child: "is me"}, {plugins: [...plugins,  aggro]})
+	const o= prox({parent: "is me"}, {plugins: [...plugins,  aggro]})
 	t.ok( o._prox, "root object has a _prox")
-	o.foo=  {}
+	o.foo= {child: "i am"}
 	t.ok( o.foo._prox, "child object has a _prox")
 	t.equal( o.foo._prox.parent, o._prox, "child points to `parent`")
 	t.equal( o.foo._prox.parentKey, "foo", "child knowns it's key via `parentKey`")
@@ -24,7 +24,6 @@ tape("grandchildren also proxed by aggro", function(t){
 	t.equal( o.foo.bar._prox.parentKey, "bar", "proxied grandchild knows it's key via `parentKey`")
 	t.error( grandchild._prox, "real grandchild unaffected")
 	t.end()
-	process.exit(1)
 })
 
 tape("child's contents are also proxed", function(t){
