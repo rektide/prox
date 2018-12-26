@@ -43,8 +43,8 @@ tape("child's contents are also proxed", function(t){
 tape("one object can be aggroed by two prox", function(t){
 	const
 	  shared= {},
-	  proxed1= prox({}, {plugins: [plugins, aggro]}),
-	  proxed2= prox({}, {plugins: [plugins, aggro]})
+	  proxed1= prox({}, {plugins: [...plugins, aggro]}),
+	  proxed2= prox({}, {plugins: [...plugins, aggro]})
 
 	proxed1.alpha= shared
 	t.error( shared._prox, "original shared object being aggroed is unaffected")
@@ -64,5 +64,9 @@ tape("one object can be aggroed by two prox", function(t){
 })
 
 tape("an array can be aggro", function(t){
+	t.end()
+})
+
+tape("can optionally do a deep recurse", function(t){
 	t.end()
 })
