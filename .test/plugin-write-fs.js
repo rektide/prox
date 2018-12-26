@@ -3,8 +3,9 @@ import { sep } from "path"
 import tape from "tape"
 import { promisify } from "util"
 import prox from ".."
-import AggroPlugin from "../plugin/aggro"
-import WriteFsPlugin from "../plugin/write-fs"
+import { plugins} from "../defaults.js"
+import aggro from "../plugin/aggro.js"
+import writeFs from "../plugin/write-fs.js"
 
 const
   readFile= promisify( ReadFile),
@@ -12,9 +13,8 @@ const
 
 tape( "object field gets written", function( t){
 	t.plan( 2)
-	const o= prox.make()
-	o._prox.addPlugin( AggroPlugin)
 	const
+	  o= prox({}, {plugins: [...plugins, aggro, writeFs]}),
 	  symbol= o._prox.addPlugin( WriteFsPlugin),
 	  pluginState= o._prox[ symbol]
 	pluginState.localPath= __dirname
