@@ -1,7 +1,7 @@
 import { writeFile as WriteFile } from "fs"
 import { resolve } from "path"
 import { promisify } from "util"
-import serialize from "caminus/serialize"
+import serialize from "caminus/serialize.js"
 
 const writeFile= promisify( WriteFile)
 
@@ -9,19 +9,17 @@ export class WriteFs{
 	static get phases(){
 		return {
 			postrun: {
-				setWriteFs: WriteFs.prototype.set
+				set: WriteFs.prototype.set
 			}
 		}
 	}
-	constructor( prox, symbol){
-		this.symbol= symbol // why would we need this? chain looks up our state.
-		this.tail= Promise.resolve()
+	constructor(){
 	}
-	set( exec){
+	set( cursor){
 		const
-		  self= stepState( exec),
-		  target= exec.prox.proxied, // arg's target is the unproxied object
-		  [ _, prop, val ]= exec.args,
+		  self= cursor.plugin,
+		  target= cursor.phasedMiddleware.proxied, // arg's target is the unproxied object
+		  [ _, prop, val ]= exec.inputs,
 		  t= typeof( val)
 
 		const path= self.pathFor( target, prop)
@@ -29,7 +27,7 @@ export class WriteFs{
 		if( t=== "string"|| t=== "number"){
 			// queue a write of this primitive
 			self.writeFile( path, val)
-			return exec.next()
+			return
 		}else{
 			// aggro should 
 			const basePath= self.pathFor( target)
