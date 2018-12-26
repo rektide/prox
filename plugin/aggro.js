@@ -3,12 +3,15 @@ import { $plugins} from "phased-middleware/symbol.js"
 
 export function setAggro({ inputs, phasedMiddleware, setOutput} ){
 	const val= inputs[ 2]
+	// weed out primitives
 	if( !val){
 		return
 	}
-	if( Object(val)!== val){
+	const type= typeof( val)
+	if( type!== "object"&& (type=== "number"|| type=== "string"|| type=== "boolean"|| type=== "symbol")){
 		return
 	}
+	// 
 	const
 	  [ target, key]= inputs,
 	  parentProx= phasedMiddleware,
@@ -16,16 +19,25 @@ export function setAggro({ inputs, phasedMiddleware, setOutput} ){
 	if( existingProx&& existingProx.parent=== parentProx&& existingProx.parentKey=== key){
 		// object already has a prox with the correct location information
 		return
+	}else if(existingProx){
+		// unwrap obj
+		val= val._prox.obj
 	}
 	const
 	  plugins= parentProx[ $plugins],
-	  proxied= Prox( val, { plugins}) // the aggro plugin will recursively apply itself here
+	  proxied= Prox( val, { plugins})
 	proxied._prox.parent= phasedMiddleware
 	proxied._prox.parentKey= key
 
 	// swap in the new proxied object
 	setOutput( proxied)
 	inputs[ 2]= proxied
+
+	// recurse
+	// for now, only doing a shallow pass!
+	for( let o in val){
+		proxied[ o]= val[ o]
+	}
 }
 setAggro.phase= {pipeline: "set", phase: "prerun"}
 
