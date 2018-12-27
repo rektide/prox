@@ -1,5 +1,5 @@
 export function makeProxProp( propertyName= "_prox"){
-	function getPropProx( context){
+	function getProxProp( context){
 		const key= context.inputs[ 1]
 		if( key=== "_prox"){
 			context.setOutput( context.phasedMiddleware) // return the prox
@@ -14,7 +14,7 @@ export function makeProxProp( propertyName= "_prox"){
 }
 
 export const
-  _prox= makePropProx(),
+  _prox= makeProxProp(),
   prox= _prox,
   proxProp= _prox
 
