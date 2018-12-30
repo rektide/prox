@@ -8,6 +8,13 @@ let _id= 0
 function makeProxyHandlers( prox){
 	const handlers= {}
 	pipelineNames.forEach( method=> {
+		// guessing this is slower alas
+		//const handler= function( ...args){
+		//	return handler.prox.exec( handler.method, null, ...args)
+		//}
+		//handler.prox= prox
+		//handler.method= method
+		//handlers[ method]= handler
 		handlers[ method]= function( ...args){
 			return prox.exec( method, null, ...args)
 		}
