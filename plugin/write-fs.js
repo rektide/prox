@@ -83,7 +83,11 @@ export class WriteFs{
 	writeFile( path, val){
 		this.tail= this.tail.then( writeFile.bind(null, path, val))
 	}
+	static get singleton(){
+		return true
+	}
 }
 WriteFs.prototype.set.phase= "postrun"
 
-export default WriteFs
+export const singleton= new WriteFs()
+export default singleton

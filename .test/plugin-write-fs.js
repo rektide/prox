@@ -15,7 +15,6 @@ tape( "object field gets written", function( t){
 	t.plan( 2)
 	const
 	  o= prox({}, {plugins: [...plugins, aggro, writeFs]}),
-	  symbol= o._prox.addPlugin( WriteFsPlugin),
 	  pluginState= o._prox[ symbol]
 	pluginState.localPath= __dirname
 	o.n = 2
