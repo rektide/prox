@@ -2,6 +2,7 @@ import { writeFile as WriteFile } from "fs"
 import { resolve } from "path"
 import { promisify } from "util"
 import serialize from "caminus/serialize.js"
+import { $instantiate} from "phased-middleware/symbol.js"
 
 const writeFile= promisify( WriteFile)
 
@@ -83,11 +84,12 @@ export class WriteFs{
 	writeFile( path, val){
 		this.tail= this.tail.then( writeFile.bind(null, path, val))
 	}
-	static get singleton(){
-		return true
+	static get name(){
+		return "write-fs"
 	}
 }
 WriteFs.prototype.set.phase= "postrun"
 
 export const singleton= new WriteFs()
+singleton[ $instantiate]= true
 export default singleton

@@ -1,9 +1,7 @@
 import PhasedMiddleware from "phased-middleware"
 import { pipelines, pipelineNames} from "./pipeline.js"
 import { defaults, defaulter } from "./defaults.js"
-
-let _id= 0
-
+import { $symbols} from "phased-middleware/symbol.js"
 
 function makeProxyHandlers( prox){
 	const handlers= {}
@@ -15,8 +13,9 @@ function makeProxyHandlers( prox){
 		//handler.prox= prox
 		//handler.method= method
 		//handlers[ method]= handler
-		handlers[ method]= function( ...args){
-			return prox.exec( method, null, ...args)
+		handlers[ method]= function( o, ...args){
+			const symbols= prox.symbolMap&& prox.symbolMap.get( o)
+			return prox.exec( method, null, symbols, o, ...args)
 		}
 	})
 	return handlers
@@ -36,16 +35,49 @@ export class Prox extends PhasedMiddleware{
 
 	constructor( obj= {}, opts= defaults){
 		super( defaulter( opts))
+		let symbolMap
+		const handler= makeProxyHandlers( this)
 		Object.defineProperties( this, {
 			// create proxyied object that we are the handler for
+			handler: {
+				value: handler
+			},
 			proxied: {
-				value: new Proxy( obj, makeProxyHandlers( this))
+				get: function(){
+					if( !this.symbolMap){
+						return new Proxy( obj, makeProxyHandlers( this))
+					}
+					throw new Error( "forked prox no longer has a specific proxied")
+				}
 			},
-			// our target object
-			obj: {
-				value: obj
-			},
+			symbolMap: {
+				get: function(){
+					return symbolMap
+				},
+				set: function( val){
+					symbolMap= val
+				}
+			}
 		})
+	}
+	/**
+	* Return a prox proxy for a new `obj`.
+	* @danger: do not `#install` after `#fork`, symbols will be out of alignment
+	*/
+	fork( obj){
+		const newSymbols= this.plugins.map( plugin=> Symbol( pluginName( plugin)))
+		if( this.symbolMap){
+			this.symbolMap.put( obj, newSymbols)
+			return new Proxy( obj, this.handler)
+		}else{
+			const
+			  oldObj= this.proxied,
+			  symbolMap= new WeakMap()
+			symbolMap.put( oldObj, this.symbols)
+			symbolMap.put( obj, newSymbols)
+			this.symbolMap= symbolMap
+		}
+		return this
 	}
 }
 export default Prox.make

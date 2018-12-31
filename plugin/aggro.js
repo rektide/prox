@@ -1,5 +1,5 @@
 import Prox from "../prox"
-import { $plugins} from "phased-middleware/symbol.js"
+import { $plugins, $instantiate} from "phased-middleware/symbol.js"
 
 export function setAggro({ inputs, phasedMiddleware, setOutput} ){
 	const val= inputs[ 2]
@@ -47,7 +47,7 @@ setAggro.phase= {pipeline: "set", phase: "prerun"}
 */
 export const aggro= {
 	set: setAggro,
-	name: "aggro"
+	name: "aggro",
+	[ $instantiate]: true
 }
-
 export default aggro
