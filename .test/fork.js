@@ -54,23 +54,28 @@ tape( "can fork a prox", function( t){
 	  forked= prox.fork( newObj)
 	t.equal( forked.ok, 99, "forked object finds own values")
 
-	// validate some expected
+	// validate changes on prox
 	t.equal( proxed._prox, prox, "proxed._prox is prox")
 	t.equal( forked._prox, prox, "forked._prox is prox too")
 	t.ok( proxed._prox.symbolMap, "prox gained a symbolMap")
 
-	const
-	  proxedMap= prox.symbolMap.get( obj),
-	  forkedMap= prox.symbolMap.get( newObj)
-	t.equal( proxed._magicTest.symbols, proxedMap, "symbolMap has obj's symbol map")
-	t.notOk( proxed._magicTest.pluginData, "no proxed magicTest data")
-	t.equal( forked._magicTest.symbols, forked._prox.symbolMap.get( newObj), "symbolMap has newObj's symbol map")
-	t.notOk( forked._magicTest.pluginData, "no forked magicTest data")
+	// validate clean magicTest state
+	t.ok( proxed._magicTest.symbol, "proxed has a magic symbol")
+	t.notOk( proxed._magicTest.pluginData, "proxed has no magic data")
+	t.ok( forked._magicTest.symbol, "forked has no magic symbol")
+	t.notOk( forked._magicTest.pluginData, "forked has no magic data")
 
-	// set data
+	// set forked magic data
 	forked._magicTest= "magic"
+	t.notOk( proxed._magicTest.pluginData, "proxed has no pluginData")
 	t.equal( forked._magicTest.pluginData, "magic", "forked magicTest has new data")
-	t.notOk( proxed._magicTest.pluginData, "magic", "proxes has no magicTest data")
+	t.equal( prox[ forked._magicTest.symbol], "magic", "forked magicTest data is held on prox")
 
+	// set proxed magic data
+	proxed._magicTest= "orig"
+	t.equal( proxed._magicTest.pluginData, "orig", "proxed magicTest has new data")
+	t.equal( prox[ proxed._magicTest.symbol], "orig", "proxed magicTest data is held on prox")
+	t.equal( forked._magicTest.pluginData, "magic", "forked magicTest has new data")
+	t.equal( prox[ forked._magicTest.symbol], "magic", "forked magicTest data is held on prox")
 	t.end()
 })
