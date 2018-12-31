@@ -1,6 +1,7 @@
 import PhasedMiddleware from "phased-middleware"
 import { pipelines, pipelineNames} from "./pipeline.js"
 import { defaults, defaulter } from "./defaults.js"
+import { pluginName} from "phased-middleware/name.js"
 import { $symbols} from "phased-middleware/symbol.js"
 
 function makeProxyHandlers( prox){
@@ -37,15 +38,24 @@ export class Prox extends PhasedMiddleware{
 		super( defaulter( opts))
 		let symbolMap
 		const handler= makeProxyHandlers( this)
+		let proxied= new Proxy( obj, handler)
 		Object.defineProperties( this, {
 			// create proxyied object that we are the handler for
 			handler: {
 				value: handler
 			},
+			obj: {
+				get: function(){
+					if( !this.symbolMap){
+						return obj
+					}
+					throw new Error( "forked prox no longer has a specific obj")
+				}
+			},
 			proxied: {
 				get: function(){
 					if( !this.symbolMap){
-						return new Proxy( obj, makeProxyHandlers( this))
+						return proxied
 					}
 					throw new Error( "forked prox no longer has a specific proxied")
 				}
@@ -56,10 +66,13 @@ export class Prox extends PhasedMiddleware{
 				},
 				set: function( val){
 					symbolMap= val
+					proxied= null
+					obj= null
 				}
 			}
 		})
 	}
+
 	/**
 	* Return a prox proxy for a new `obj`.
 	* @danger: do not `#install` after `#fork`, symbols will be out of alignment
@@ -68,16 +81,15 @@ export class Prox extends PhasedMiddleware{
 		const newSymbols= this.plugins.map( plugin=> Symbol( pluginName( plugin)))
 		if( this.symbolMap){
 			this.symbolMap.put( obj, newSymbols)
-			return new Proxy( obj, this.handler)
 		}else{
 			const
-			  oldObj= this.proxied,
+			  oldObj= this.obj,
 			  symbolMap= new WeakMap()
-			symbolMap.put( oldObj, this.symbols)
-			symbolMap.put( obj, newSymbols)
+			symbolMap.set( oldObj, this.symbols)
+			symbolMap.set( obj, newSymbols)
 			this.symbolMap= symbolMap
 		}
-		return this
+		return new Proxy( obj, this.handler)
 	}
 }
 export default Prox.make
