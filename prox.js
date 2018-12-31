@@ -89,6 +89,10 @@ export class Prox extends PhasedMiddleware{
 			symbolMap.set( obj, newSymbols)
 			this.symbolMap= symbolMap
 		}
+
+		// TODO: iterate through symbols & fork? except we don't know current object, blah
+		// hacked _prox to store this. :/
+
 		return new Proxy( obj, this.handler)
 	}
 }

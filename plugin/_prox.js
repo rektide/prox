@@ -1,7 +1,10 @@
+export let currentObject
+
 export function makeProxProp( propertyName= "_prox"){
 	function getProxProp( context){
 		const key= context.inputs[ 1]
 		if( key=== "_prox"){
+			currentObject= context.inputs[ 0]
 			context.setOutput( context.phasedMiddleware) // return the prox
 			context.position= context.phasedRun.length // terminate
 		}
