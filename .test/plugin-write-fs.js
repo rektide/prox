@@ -15,8 +15,8 @@ tape( "object field gets written", function( t){
 	t.plan( 2)
 	const
 	  o= prox({}, {plugins: [...plugins, aggro, writeFs]}),
-	  pluginState= o._prox[ symbol]
-	pluginState.localPath= __dirname
+	  writeFsSymbol= o._prox.symbol( 2)
+	  o._prox[ writeFsSymbol]= {localPath: __dirname}
 	o.n = 2
 	t.equal( o.n, 2, "value set & can be read")
 
