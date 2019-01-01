@@ -3,8 +3,16 @@ import proxProp from "./plugin/_prox.js"
 import reflect from "./plugin/reflect.js"
 
 export { pipelines }
+export const
+  Pipelines= pipelines,
+  defaultPipelines= pipelines,
+  DefaultPipelines= pipelines
 
-export const plugins= Object.freeze([ proxProp, reflect])
+export const
+  plugins= Object.freeze([ proxProp, reflect]),
+  Plugins= plugins,
+  defaultPlugins= plugins,
+  DefaultPlugins= plugins
 
 export const defaults= {
 	pipelines,

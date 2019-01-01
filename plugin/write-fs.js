@@ -3,6 +3,8 @@ import { resolve } from "path"
 import { promisify } from "util"
 import serialize from "caminus/serialize.js"
 import { $instantiate} from "phased-middleware/symbol.js"
+import { $pathFor, $manager, $writeFile} from "../symbol.js"
+import ManagerSingleton from "./fs/manager.js"
 
 const writeFile= promisify( WriteFile)
 
@@ -23,14 +25,18 @@ export class WriteFs{
 		}
 		this[ $manager]= manager
 	}
+	get manager(){
+		return this[ $manager]
+	}
+
 	set( cursor){
 		const
 		  self= cursor.plugin,
-		  target= cursor.phasedMiddleware.proxied, // arg's target is the unproxied object
-		  [ _, prop, val ]= exec.inputs,
+		  [ target, prop, val ]= cursor.inputs,
 		  t= typeof( val)
 
 		const path= self.pathFor( target, prop)
+
 		// assert this is a primitive
 		if( t=== "string"|| t=== "number"){
 			// queue a write of this primitive
@@ -43,9 +49,6 @@ export class WriteFs{
 				
 			}
 		}
-
-		// continue
-		exec.next()
 	}
 	pathFor( target, prop){
 		const

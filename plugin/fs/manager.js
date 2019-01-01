@@ -1,8 +1,20 @@
+import Deferrant from "deferrant"
+
 export class Manager{
 	constructor(){
+		this.empty= null
 		this.current= null // promise for in progress
 		this.finish= this.finish.bind( this)
 		this.queue= [] // queue of things to run
+	}
+	awaitEmpty(){
+		if( !this.queue.length){
+			return Promise.resolve( this)
+		}
+		if( !this.empty){
+			this.empty= Deferrant()
+		}
+		return this.empty
 	}
 	push( o){
 		if( !o){
@@ -17,6 +29,10 @@ export class Manager{
 	}
 	dispatch( o= this.queue.pop()){
 		if( !o){
+			if( this.empty){
+				this.empty.resolve()
+				this.empty= null
+			}
 			return
 		}
 		const val= o()
@@ -39,5 +55,6 @@ export class Manager{
 
 export const
   singleton= new Manager(),
+  managerSingleton= singleton,
   ManagerSingleton= singleton
 export default singleton
