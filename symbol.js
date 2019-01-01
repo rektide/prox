@@ -1,7 +1,11 @@
+// prox.js
 export const
   fork= Symbol.for( "prox:fork"),
   Fork= fork,
-  $fork= fork,
+  $fork= fork
+
+// plugin/write-fs.js
+export const
   manager= Symbol.for( "prox:manager"),
   Manager= manager,
   $manager= manager,
