@@ -14,7 +14,14 @@ export class WriteFs{
 			}
 		}
 	}
-	constructor(){
+	constructor({ manager}={ manager: ManagerSingleton}, cursor){
+		if (!manager&& cursor){
+			manager= cursor.get( $manager)
+		}
+		if( !manager){
+			manager= ManagerSingleton
+		}
+		this[ $manager]= manager
 	}
 	set( cursor){
 		const
@@ -84,11 +91,14 @@ export class WriteFs{
 	writeFile( path, val){
 		this.tail= this.tail.then( writeFile.bind(null, path, val))
 	}
+	
 	static get name(){
 		return "write-fs"
 	}
 }
 WriteFs.prototype.set.phase= "postrun"
+WriteFs.prototype[ $pathFor]= WriteFs.prototype.pathFor
+WriteFs.prototype[ $writeFile]= WriteFs.prototype.writeFile
 
 export const singleton= new WriteFs()
 singleton[ $instantiate]= true

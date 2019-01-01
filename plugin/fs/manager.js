@@ -37,5 +37,7 @@ export class Manager{
 	}
 }
 
-export const singleton= new Manager()
+export const
+  singleton= new Manager(),
+  ManagerSingleton= singleton
 export default singleton
