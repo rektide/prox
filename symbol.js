@@ -6,12 +6,15 @@ export const
 
 // plugin/write-fs.js
 export const
-  manager= Symbol.for( "prox:manager"),
+  localPath= Symbol.for( "prox:fs:localPath"),
+  LocalPath= localPath,
+  $localPath= localPath,
+  manager= Symbol.for( "prox:fs:manager"),
   Manager= manager,
   $manager= manager,
   pathFor= Symbol.for( "prox:pathFor"),
   PathFor= pathFor,
   $pathFor= pathFor,
-  writeFile= Symbol.for( "prox:writeFile"),
-  WriteFile= writeFile,
-  $writeFile= writeFile
+  serializeOptions= Symbol.for( "prox:serializeOptions"),
+  SerializeOptions= serializeOptions,
+  $serializeOptions= serializeOptions

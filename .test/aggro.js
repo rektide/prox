@@ -1,15 +1,23 @@
 import tape from "tape"
 import prox from ".."
 import aggro from "../plugin/aggro.js"
-import { plugins} from "../defaults.js"
+import { DefaultPlugins} from "../defaults.js"
 
-tape("aggro adds prox to child", function(t){
-	const o= prox({parent: "is me"}, {plugins: [...plugins,  aggro]})
+tape.only("aggro adds prox to child", function(t){
+	const
+	  plugins=[ ...DefaultPlugins, aggro],
+	  i= plugins.length -1,
+	  o= prox({ parent: "is me"},{ plugins}),
+	  foo= { value: "a child"}
 	t.ok( o._prox, "root object has a _prox")
-	o.foo= {child: "i am"}
-	t.ok( o.foo._prox, "child object has a _prox")
-	t.equal( o.foo._prox.parent, o._prox, "child points to `parent`")
-	t.equal( o.foo._prox.parentKey, "foo", "child knowns it's key via `parentKey`")
+	o.foo= foo
+	const fooProx= o.foo._prox
+	t.ok( fooProx, "child object has a _prox")
+	const
+	  symbol= fooProx.symbol( i, foo),
+	  data= fooProx[ symbol]
+	t.equal( data.parent, o._prox, "child points to `parent`")
+	t.equal( data.parentKey, "foo", "child knowns it's key via `parentKey`")
 	t.end()
 })
 
@@ -63,10 +71,10 @@ tape("one object can be aggroed by two prox", function(t){
 	t.end()
 })
 
-tape("an array can be aggro", function(t){
+tape( "an array can be aggro", function(t){
 	t.end()
 })
 
-tape("can optionally do a deep recurse", function(t){
+tape( "can optionally do a deep recurse", function(t){
 	t.end()
 })

@@ -1,9 +1,7 @@
-import { writeFile as WriteFile } from "fs"
 import { resolve } from "path"
-import { promisify } from "util"
 import serialize from "caminus/serialize.js"
 import { $instantiate} from "phased-middleware/symbol.js"
-import { $pathFor, $manager, $writeFile} from "../symbol.js"
+import { $pathFor, $manager, $serializeOptions} from "../symbol.js"
 import ManagerSingleton from "./fs/manager.js"
 
 const writeFile= promisify( WriteFile)
@@ -33,21 +31,12 @@ export class WriteFs{
 		const
 		  self= cursor.plugin,
 		  [ target, prop, val ]= cursor.inputs,
-		  t= typeof( val)
-
-		const path= self.pathFor( target, prop)
-
-		// assert this is a primitive
-		if( t=== "string"|| t=== "number"){
-			// queue a write of this primitive
-			self.writeFile( path, val)
-			return
-		}else{
-			// aggro should 
-			const basePath= self.pathFor( target)
-			for( var i of val){
-				
-			}
+		  t= typeof( val),
+		  path= self.pathFor( target, prop),
+		  opts= cursor.get( $serializeOptions),
+		  task= ()=> serialize( path, val, opts)
+		if( task){
+			self.manager.push( task)
 		}
 	}
 	pathFor( target, prop){
@@ -91,17 +80,12 @@ export class WriteFs{
 		}
 		return resolve( ...paths)
 	}
-	writeFile( path, val){
-		this.tail= this.tail.then( writeFile.bind(null, path, val))
-	}
-	
 	static get name(){
 		return "write-fs"
 	}
 }
-WriteFs.prototype.set.phase= "postrun"
+WriteFs.prototype.set.phase= { pipeline: "set", phase: "postrun"}
 WriteFs.prototype[ $pathFor]= WriteFs.prototype.pathFor
-WriteFs.prototype[ $writeFile]= WriteFs.prototype.writeFile
 
 export const singleton= new WriteFs()
 singleton[ $instantiate]= true

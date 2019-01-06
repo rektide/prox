@@ -1,4 +1,9 @@
+// points to the underlying unproxied last asked for _prox object
 export let currentObject
+
+export function setCurrentObject( value){
+	currentObject= value
+}
 
 export function makeProxProp( propertyName= "_prox"){
 	function getProxProp( cursor){

@@ -33,7 +33,6 @@ export class Prox extends PhasedMiddleware{
 		var p= new Prox( obj, opts)
 		return p.proxied
 	}
-
 	constructor( obj= {}, opts= defaults){
 		super( defaulter( opts))
 		let symbolMap
@@ -72,7 +71,16 @@ export class Prox extends PhasedMiddleware{
 			}
 		})
 	}
-
+	symbol( i, obj){
+		if( obj&& this.symbolMap){
+			return this.symbolMap.get( obj)[ i]
+		}
+		return this[ $symbols][ i]
+	}
+	pluginData( i, obj){
+		const symbol= this.symbol( i, obj)
+		return this[ symbol]
+	}
 	/**
 	* Return a prox proxy for a new `obj`.
 	* @danger: do not `#install` after `#fork`, symbols will be out of alignment
@@ -92,7 +100,6 @@ export class Prox extends PhasedMiddleware{
 
 		// TODO: iterate through symbols & fork? except we don't know current object, blah
 		// hacked _prox to store this. :/
-
 		return new Proxy( obj, this.handler)
 	}
 }
