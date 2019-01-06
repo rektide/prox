@@ -1,7 +1,7 @@
 import { resolve } from "path"
 import serialize from "caminus/serialize.js"
 import { $instantiate} from "phased-middleware/symbol.js"
-import { $manager, $pathFor, $serializeOptions, $symbol} from "../symbol.js"
+import { $manager, $pathFor, $serializeOptions} from "../symbol.js"
 import { PipelineSymbol} from "../pipeline.js"
 import ManagerSingleton from "./fs/manager.js"
 
@@ -58,7 +58,7 @@ export class WriteFs{
 					break
 				}
 
-				// add our property namee here
+				// add our property name here
 				const parentKey= walk.parentKey
 				if( !parentKey){
 					throw new Error("could not calculate write-fs path")

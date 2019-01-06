@@ -50,8 +50,8 @@ export function setAggro({ inputs, phasedMiddleware, setOutput, i, symbol}){
 	//setOutput( proxied)
 	inputs[ 2]= proxied
 
-	// recurse
-	// for now, only doing a shallow pass!
+	// recurse, which will also recurse
+	// for now, only doing a shallow pass via `in`
 	for( let o in val){
 		proxied[ o]= val[ o]
 	}
