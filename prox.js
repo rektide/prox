@@ -1,26 +1,8 @@
 import PhasedMiddleware from "phased-middleware"
-import { pipelines, pipelineNames} from "./pipeline.js"
+import { PipelineNames, PipelineSymbols} from "./pipeline.js"
 import { defaults, defaulter } from "./defaults.js"
 import { pluginName} from "phased-middleware/name.js"
 import { $symbols} from "phased-middleware/symbol.js"
-
-function makeProxyHandlers( prox){
-	const handlers= {}
-	pipelineNames.forEach( method=> {
-		// guessing this is slower alas
-		//const handler= function( ...args){
-		//	return handler.prox.exec( handler.method, null, ...args)
-		//}
-		//handler.prox= prox
-		//handler.method= method
-		//handlers[ method]= handler
-		handlers[ method]= function( o, ...args){
-			const symbols= prox.symbolMap&& prox.symbolMap.get( o)
-			return prox.exec( method, null, symbols, o, ...args)
-		}
-	})
-	return handlers
-}
 
 /**
 * prox is a proxy 'handler' instance, pointing to a specific obj
@@ -33,15 +15,14 @@ export class Prox extends PhasedMiddleware{
 		var p= new Prox( obj, opts)
 		return p.proxied
 	}
-	constructor( obj= {}, opts= defaults){
+	constructor( obj= {}, opts){
 		super( defaulter( opts))
 		let symbolMap
-		const handler= makeProxyHandlers( this)
-		let proxied= new Proxy( obj, handler)
+		let proxied= new Proxy( obj, this)
 		Object.defineProperties( this, {
 			// create proxyied object that we are the handler for
 			handler: {
-				value: handler
+				value: this
 			},
 			obj: {
 				get: function(){
@@ -88,7 +69,7 @@ export class Prox extends PhasedMiddleware{
 	fork( obj){
 		const newSymbols= this.plugins.map( plugin=> Symbol( pluginName( plugin)))
 		if( this.symbolMap){
-			this.symbolMap.put( obj, newSymbols)
+			this.symbolMap.set( obj, newSymbols)
 		}else{
 			const
 			  oldObj= this.obj,
@@ -100,7 +81,16 @@ export class Prox extends PhasedMiddleware{
 
 		// TODO: iterate through symbols & fork? except we don't know current object, blah
 		// hacked _prox to store this. :/
-		return new Proxy( obj, this.handler)
+		return new Proxy( obj, this)
+	}
+}
+for( let i= 0; i< PipelineNames.length; ++i){
+	const
+	  method= PipelineNames[ i],
+	  symbol= PipelineSymbols[ i]
+	Prox.prototype[ method]= function( o, ...args){
+		const symbols= this.symbolMap&& this.symbolMap.get( o)
+		return this.exec( symbol, null, symbols, o, ...args)
 	}
 }
 export default Prox.make

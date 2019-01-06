@@ -1,3 +1,5 @@
+import { PipelineSymbol} from "../pipeline.js"
+
 // points to the underlying unproxied last asked for _prox object
 export let currentObject
 
@@ -14,7 +16,7 @@ export function makeProxProp( propertyName= "_prox"){
 			cursor.position= cursor.phasedRun.length // terminate
 		}
 	}
-	getProxProp.phase= { pipeline: "get", phase: "prerun"}
+	getProxProp.phase= { pipeline: PipelineSymbol.get, phase: "prerun"}
 	return {
 		name: "prox-prop",
 		get: getProxProp

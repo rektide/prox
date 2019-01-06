@@ -1,5 +1,6 @@
-import pipelineNames from "../pipeline.js"
+import { PipelineNames}  from "../pipeline.js"
 import { default as _reflect } from "../util/reflect"
+import { $phases} from "phased-middleware/symbol.js"
 
 /**
 * Lookup Reflect[ method] & create a chain handler for it.
@@ -14,9 +15,10 @@ export function makeHandler( method){
 			const output= reflected( ...context.inputs) // run
 			context.setOutput( output) // save `output`
 		}
-	  }
-	tmp[ name].phase= {pipeline: method, phase: "run"}
-	return tmp[ name]
+	  },
+	  handler= tmp[ name]
+	handler[ $phases]={ pipeline: method, phase: "run"}
+	return handler
 }
 
 /**
@@ -29,6 +31,6 @@ export default reflect
 
 // iterate through all methods, creating each handler on run
 
-Object.keys( pipelineNames).forEach( function( method){
+Object.values( PipelineNames).forEach( function( method, i){
 	reflect[ method]= makeHandler( method)
 })

@@ -1,4 +1,4 @@
-import { pipelines } from "./pipeline.js"
+import { PhasedMiddlewarePipelines as pipelines, alias} from "./pipeline.js"
 import proxProp from "./plugin/_prox.js"
 import reflect from "./plugin/reflect.js"
 
@@ -15,8 +15,9 @@ export const
   DefaultPlugins= plugins
 
 export const defaults= {
+	alias,
 	pipelines,
-	plugins
+	plugins,
 }
 export default defaults
 

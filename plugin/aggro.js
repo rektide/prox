@@ -1,6 +1,6 @@
 import Prox from "../prox"
 import { currentObject, setCurrentObject} from "./_prox.js"
-import { $plugins, $instantiate} from "phased-middleware/symbol.js"
+import { $phases, $plugins, $instantiate} from "phased-middleware/symbol.js"
 
 export function setAggro({ inputs, phasedMiddleware, setOutput, i, symbol}){
 	const val= inputs[ 2]
@@ -56,7 +56,7 @@ export function setAggro({ inputs, phasedMiddleware, setOutput, i, symbol}){
 		proxied[ o]= val[ o]
 	}
 }
-setAggro.phase= {pipeline: "set", phase: "prerun"}
+setAggro[ $phases]= {pipeline: "set", phase: "prerun"}
 
 /**
 * Recursive applicator of "prox"

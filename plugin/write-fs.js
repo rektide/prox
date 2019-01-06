@@ -1,7 +1,8 @@
 import { resolve } from "path"
 import serialize from "caminus/serialize.js"
 import { $instantiate} from "phased-middleware/symbol.js"
-import { $pathFor, $manager, $serializeOptions} from "../symbol.js"
+import { $manager, $pathFor, $serializeOptions, $symbol} from "../symbol.js"
+import { PipelineSymbol} from "../pipeline.js"
 import ManagerSingleton from "./fs/manager.js"
 
 const writeFile= promisify( WriteFile)

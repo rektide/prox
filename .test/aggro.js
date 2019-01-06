@@ -3,16 +3,18 @@ import prox from ".."
 import aggro from "../plugin/aggro.js"
 import { DefaultPlugins} from "../defaults.js"
 
-tape.only("aggro adds prox to child", function(t){
+tape("aggro adds prox to child", function(t){
 	const
 	  plugins=[ ...DefaultPlugins, aggro],
 	  i= plugins.length -1,
 	  o= prox({ parent: "is me"},{ plugins}),
 	  foo= { value: "a child"}
 	t.ok( o._prox, "root object has a _prox")
+	t.notOk( foo._prox, "foo does not yet have a _prox")
 	o.foo= foo
 	const fooProx= o.foo._prox
-	t.ok( fooProx, "child object has a _prox")
+	t.ok( fooProx, "o.foo now a _prox")
+	t.notOk( foo._prox, "original foo does not have a _prox")
 	const
 	  symbol= fooProx.symbol( i, foo),
 	  data= fooProx[ symbol]
@@ -22,7 +24,7 @@ tape.only("aggro adds prox to child", function(t){
 })
 
 tape("grandchildren also proxed by aggro", function(t){
-	const o= prox({}, {plugins: [...plugins, aggro]})
+	const o= prox({}, {plugins: [...DefaultPlugins, aggro]})
 	t.ok( o._prox, "root object has a `_prox`")
 	o.foo=  {}
 	const grandchild= {}
@@ -36,7 +38,7 @@ tape("grandchildren also proxed by aggro", function(t){
 
 tape("child's contents are also proxed", function(t){
 	const
-	  o= prox({}, {plugins: [...plugins, aggro]}),
+	  o= prox({}, {plugins: [...DefaultPlugins, aggro]}),
 	  more= {
 		stuff: {},
 		primitive: 42
@@ -51,8 +53,8 @@ tape("child's contents are also proxed", function(t){
 tape("one object can be aggroed by two prox", function(t){
 	const
 	  shared= {},
-	  proxed1= prox({}, {plugins: [...plugins, aggro]}),
-	  proxed2= prox({}, {plugins: [...plugins, aggro]})
+	  proxed1= prox({}, {plugins: [...DefaultPlugins, aggro]}),
+	  proxed2= prox({}, {plugins: [...DefaultPlugins, aggro]})
 
 	proxed1.alpha= shared
 	t.error( shared._prox, "original shared object being aggroed is unaffected")
