@@ -3,10 +3,10 @@ import prox from ".."
 import aggro from "../plugin/aggro.js"
 import { DefaultPlugins} from "../defaults.js"
 
+const plugins= [...DefaultPlugins, aggro]
+
 tape("aggro adds prox to child", function(t){
 	const
-	  plugins=[ ...DefaultPlugins, aggro],
-	  i= plugins.length -1,
 	  o= prox({ parent: "is me"},{ plugins}),
 	  foo= { value: "a child"}
 	t.ok( o._prox, "root object has a _prox")
@@ -15,30 +15,29 @@ tape("aggro adds prox to child", function(t){
 	const fooProx= o.foo._prox
 	t.ok( fooProx, "o.foo now a _prox")
 	t.notOk( foo._prox, "original foo does not have a _prox")
-	const
-	  symbol= fooProx.symbol( i, foo),
-	  data= fooProx[ symbol]
+	const data= fooProx.pluginData( aggro, foo)
 	t.equal( data.parent, o._prox, "child points to `parent`")
 	t.equal( data.parentKey, "foo", "child knowns it's key via `parentKey`")
 	t.end()
 })
 
 tape("grandchildren also proxed by aggro", function(t){
-	const o= prox({}, {plugins: [...DefaultPlugins, aggro]})
+	const o= prox({},{ plugins})
 	t.ok( o._prox, "root object has a `_prox`")
 	o.foo=  {}
 	const grandchild= {}
 	o.foo.bar= grandchild
 	t.ok( o.foo.bar._prox, "proxed grandchild has a `_prox`")
-	t.equal( o.foo.bar._prox.parent, o.foo._prox, "proxied grandchild points to child prox via `parent`")
-	t.equal( o.foo.bar._prox.parentKey, "bar", "proxied grandchild knows it's key via `parentKey`")
-	t.error( grandchild._prox, "real grandchild unaffected")
+	const grandData= o.foo.bar._prox.pluginData( aggro, grandchild)
+	t.equal( grandData.parent, o.foo._prox, "proxied grandchild points to child prox via `parent`")
+	t.equal( grandData.parentKey, "bar", "proxied grandchild knows it's key via `parentKey`")
+	t.notOk( grandchild._prox, "real grandchild unaffected")
 	t.end()
 })
 
 tape("child's contents are also proxed", function(t){
 	const
-	  o= prox({}, {plugins: [...DefaultPlugins, aggro]}),
+	  o= prox({}, { plugins}),
 	  more= {
 		stuff: {},
 		primitive: 42
@@ -53,8 +52,8 @@ tape("child's contents are also proxed", function(t){
 tape("one object can be aggroed by two prox", function(t){
 	const
 	  shared= {},
-	  proxed1= prox({}, {plugins: [...DefaultPlugins, aggro]}),
-	  proxed2= prox({}, {plugins: [...DefaultPlugins, aggro]})
+	  proxed1= prox({},{ plugins}),
+	  proxed2= prox({},{ plugins})
 
 	proxed1.alpha= shared
 	t.error( shared._prox, "original shared object being aggroed is unaffected")

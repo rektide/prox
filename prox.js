@@ -53,13 +53,17 @@ export class Prox extends PhasedMiddleware{
 		})
 	}
 	symbol( i, obj){
-		if( obj&& this.symbolMap){
-			return this.symbolMap.get( obj)[ i]
-		}
-		return this[ $symbols][ i]
+		let symbols= obj&& this.symbolMap? this.symbolMap.get( obj): this.symbols
+		return symbols[ i]
 	}
-	pluginData( i, obj){
-		const symbol= this.symbol( i, obj)
+	pluginSymbol( plugin, obj){
+		const
+		  index= this.pluginIndex( plugin),
+		  symbol= this.symbol( index, obj)
+		return symbol
+	}
+	pluginData( plugin, obj){
+		const symbol= this.pluginSymbol( plugin, obj)
 		return this[ symbol]
 	}
 	/**
