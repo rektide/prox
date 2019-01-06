@@ -56,19 +56,22 @@ tape("one object can be aggroed by two prox", function(t){
 	  proxed2= prox({},{ plugins})
 
 	proxed1.alpha= shared
-	t.error( shared._prox, "original shared object being aggroed is unaffected")
+	t.notOk( shared._prox, "original shared object being aggroed is unaffected")
 	t.ok( proxed1.alpha._prox, "shared object is proxied accessed via parent")
-	t.equal( proxed1.alpha._prox.parent, proxed1._prox, "first proxying has parent")
-	t.equal( proxed1.alpha._prox.parentKey, "alpha", "first proxying knows it's parent's key")
+	const data1= proxed1.alpha._prox.pluginData( aggro, shared)
+	t.equal( data1.parent, proxed1._prox, "first proxying has parent")
+	t.equal( data1.parentKey, "alpha", "first proxying knows it's parent's key")
 
 	proxed2.omega= shared
-	t.error( shared._prox, "original shared object being aggroed is unaffected")
+	t.notOk( shared._prox, "original shared object being aggroed is unaffected")
 	t.ok( proxed2.omega._prox, "shared object is proxied accessed via parent")
-	t.equal( proxed2.omega._prox.parent, proxed2._prox, "second proxying has parent")
-	t.equal( proxed2.omega._prox.parentKey, "omega", "second proxying knows it's parent's key")
+	const data2= proxed2.omega._prox.pluginData( aggro, shared)
+	t.equal( data2.parent, proxed2._prox, "second proxying has parent")
+	t.equal( data2.parentKey, "omega", "second proxying knows it's parent's key")
 	// let's re-assert our proxed1, which ought be unchanged
-	t.equal( proxed1.alpha._prox.parent, proxed1._prox, "first proxying still knows it's parent")
-	t.equal( proxed1.alpha._prox.parentKey, "alpha", "first proxying still knows it's parent's key")
+	const data1b= proxed1.alpha._prox.pluginData( aggro, shared)
+	t.equal( data1b.parent, proxed1._prox, "first proxying still knows it's parent")
+	t.equal( data1b.parentKey, "alpha", "first proxying still knows it's parent's key")
 	t.end()
 })
 
