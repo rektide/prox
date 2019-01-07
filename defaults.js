@@ -1,4 +1,5 @@
 import { PhasedMiddlewarePipelines as pipelines, alias} from "./pipeline.js"
+import cursor from "./cursor.js"
 import proxProp from "./plugin/_prox.js"
 import reflect from "./plugin/reflect.js"
 
@@ -16,6 +17,7 @@ export const
 
 export const defaults= {
 	alias,
+	cursor,
 	pipelines,
 	plugins,
 }
