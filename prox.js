@@ -17,40 +17,15 @@ export class Prox extends PhasedMiddleware{
 	}
 	constructor( obj= {}, opts){
 		super( defaulter( opts))
-		let symbolMap
-		let proxied= new Proxy( obj, this)
-		Object.defineProperties( this, {
-			// create proxyied object that we are the handler for
-			handler: {
-				value: this
-			},
-			obj: {
-				get: function(){
-					if( !this.symbolMap){
-						return obj
-					}
-					throw new Error( "forked prox no longer has a specific obj")
-				}
-			},
-			proxied: {
-				get: function(){
-					if( !this.symbolMap){
-						return proxied
-					}
-					throw new Error( "forked prox no longer has a specific proxied")
-				}
-			},
-			symbolMap: {
-				get: function(){
-					return symbolMap
-				},
-				set: function( val){
-					symbolMap= val
-					proxied= null
-					obj= null
-				}
-			}
-		})
+		// these both strike me as kind of a no-no that could potentially obstruct garbage collection
+		this[ $obj]= obj
+		this[ $proxied]= proxied
+	}
+	get obj(){
+		return this[ $obj]
+	}
+	get proxied(){
+		return this[ $proxied]
 	}
 	symbol( i, obj){
 		let symbols= obj&& this.symbolMap? this.symbolMap.get( obj): this.symbols
@@ -66,6 +41,12 @@ export class Prox extends PhasedMiddleware{
 		const symbol= this.pluginSymbol( plugin, obj)
 		return this[ symbol]
 	}
+
+	free(){
+		this[ $obj]= null
+		this[ $proxied]= null
+	}
+
 	/**
 	* Return a prox proxy for a new `obj`.
 	* @danger: do not `#install` after `#fork`, symbols will be out of alignment
@@ -93,8 +74,7 @@ for( let i= 0; i< PipelineNames.length; ++i){
 	  method= PipelineNames[ i],
 	  symbol= PipelineSymbols[ i]
 	Prox.prototype[ method]= function( o, ...args){
-		const symbols= this.symbolMap&& this.symbolMap.get( o)
-		return this.exec( symbol, null, symbols, o, ...args)
+		return this.exec( symbol, null, null, o, ...args)
 	}
 }
 export default Prox.make

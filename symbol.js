@@ -2,7 +2,13 @@
 export const
   fork= Symbol.for( "prox:fork"),
   Fork= fork,
-  $fork= fork
+  $fork= fork,
+  obj= Symbol.for( "prox:obj"),
+  Obj= obj,
+  $obj= $obj,
+  proxied= Symbol.for( "prox:proxied"),
+  Proxied= proxied,
+  $proxied= proxied
 
 // plugin/write-fs.js
 export const
