@@ -11,7 +11,7 @@ tape( "can fork a prox", function( t){
 	const
 	  newObj= {ok: 99},
 	  forked= orig._prox.fork( newObj)
-	t.equal( newObj.ok, 99, "forked object finds own values")
+	t.equal( forked.ok, 99, "forked object finds own values")
 
 	// validate some expected
 	t.equal( forked._prox.parent, orig._prox, "forked prox has parent")
@@ -67,13 +67,11 @@ tape( "can fork a prox", function( t){
 	forked._magicTest= "magic"
 	t.notOk( proxed._magicTest.pluginData, "proxed has no pluginData")
 	t.equal( forked._magicTest.pluginData, "magic", "forked magicTest has new data")
-	t.equal( prox[ forked._magicTest.symbol], "magic", "forked magicTest data is held on prox")
 
 	// set proxed magic data
 	proxed._magicTest= "orig"
 	t.equal( proxed._magicTest.pluginData, "orig", "proxed magicTest has new data")
 	t.equal( prox[ proxed._magicTest.symbol], "orig", "proxed magicTest data is held on prox")
 	t.equal( forked._magicTest.pluginData, "magic", "forked magicTest has new data")
-	t.equal( prox[ forked._magicTest.symbol], "magic", "forked magicTest data is held on prox")
 	t.end()
 })

@@ -19,6 +19,9 @@ function useParentOptions( parent, extra, { recurse: _recurse= true}= {}){
 	  [ $parent]:{ value: parent}
 	}
 	return {
+	  alias: false,
+	  cursor: false,
+	  pipelines: false,
 	  [ $plugins]: false,
 	  [ $symbols]: false,
 	  extra
@@ -35,7 +38,7 @@ export function extend( klass= Prox,{ name, recurse: _recurse= true}= {}){
 			super( obj, useParentOptions( parent))
 		}
 		get alias(){
-			return this.parent.cursor
+			return this.parent.alias
 		}
 		get cursor(){
 			return this.parent.cursor

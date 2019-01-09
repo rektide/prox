@@ -63,7 +63,7 @@ for( let i= 0; i< PipelineNames.length; ++i){
 	  method= PipelineNames[ i],
 	  symbol= PipelineSymbols[ i]
 	Prox.prototype[ method]= function( o, ...args){
-		return this.exec( symbol, null, null, o, ...args)
+		return this.exec( symbol, undefined, undefined, o, ...args)
 	}
 }
 export default Prox.make
