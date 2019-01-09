@@ -1,10 +1,10 @@
 import { $plugins, $symbols} from "phased-middleware/symbol.js"
 import { Prox} from "../prox.js"
 import { $parent} from "../symbol.js"
-import { PipelineSymbols} from "../pipeline.js"
+import { PipelineNames, PipelineSymbols} from "../pipeline.js"
 
 function recurse( prox){
-	return recurse( prox.parent)
+	return prox&& recurse( prox.parent)
 }
 
 function useParentOptions( parent, extra, { recurse: _recurse= true}= {}){
@@ -57,8 +57,10 @@ export function extend( klass= Prox,{ name, recurse: _recurse= true}= {}){
 
 	// create additional getters for each pipeline too
 	const pipelineGetters= {}
-	for( let name of PipelineNames){
-		const symbol= PipelineSymbol[ name]
+	for( let i= 0; i< PipelineNames.length; ++i){
+		const
+		  name= PipelineNames[ i],
+		  symbol= PipelineSymbols[ i]
 		pipelineGetters[ symbol]= {
 			get: function(){
 				return this.parent[ symbol]
@@ -70,7 +72,15 @@ export function extend( klass= Prox,{ name, recurse: _recurse= true}= {}){
 	return unwrapped
 }
 
+let singleton
+
 export const
-  aggroProx= extend( Prox),
-  AggroProx= aggroProx
-export default AggroProx
+  factory= function(){
+	if( !singleton){
+		singleton= extend( Prox)
+	}
+	return singleton
+  },
+  aggroProxFactory= factory,
+  AggroProxFactory= factory
+export default factory

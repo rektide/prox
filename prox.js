@@ -54,7 +54,7 @@ export class Prox extends PhasedMiddleware{
 	* @danger: do not `#install` after `#fork`, symbols will be out of alignment
 	*/
 	fork( obj){
-		const newProx= new AggroProx( null, this)
+		const newProx= new (AggroProx())( obj, this)
 		return newProx.proxied
 	}
 }
