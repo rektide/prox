@@ -5,7 +5,7 @@ export const
   $fork= fork,
   obj= Symbol.for( "prox:obj"),
   Obj= obj,
-  $obj= $obj,
+  $obj= obj,
   proxied= Symbol.for( "prox:proxied"),
   Proxied= proxied,
   $proxied= proxied
@@ -24,3 +24,9 @@ export const
   serializeOptions= Symbol.for( "prox:serializeOptions"),
   SerializeOptions= serializeOptions,
   $serializeOptions= serializeOptions
+
+// plugin/aggro
+export const
+  parent= Symbol.for( "prox:aggro:parent"),
+  Parent= parent,
+  $parent= parent
