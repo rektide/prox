@@ -14,7 +14,7 @@ tape( "can fork a prox", function( t){
 	t.equal( newObj.ok, 99, "forked object finds own values")
 
 	// validate some expected
-	t.equal( forked._prox, orig._prox, "same prox on orig/forked")
+	t.equal( forked._prox.parent, orig._prox, "forked prox has parent")
 	t.end()
 })
 
@@ -47,7 +47,6 @@ tape( "can fork a prox", function( t){
 	  magicPlugins= [ magicTestPlugin, ...plugins],
 	  proxed= factory(obj,{ plugins: magicPlugins}),
 	  prox= proxed._prox
-	t.notOk( prox.symbolMap, "no symbolMap for single instance")
 
 	const
 	  newObj= {ok: 99},
@@ -56,8 +55,7 @@ tape( "can fork a prox", function( t){
 
 	// validate changes on prox
 	t.equal( proxed._prox, prox, "proxed._prox is prox")
-	t.equal( forked._prox, prox, "forked._prox is prox too")
-	t.ok( proxed._prox.symbolMap, "prox gained a symbolMap")
+	t.equal( forked._prox.parent, prox, "forked._prox has parent prox")
 
 	// validate clean magicTest state
 	t.ok( proxed._magicTest.symbol, "proxed has a magic symbol")

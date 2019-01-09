@@ -4,7 +4,7 @@ import { $parent} from "../symbol.js"
 import { PipelineNames, PipelineSymbols} from "../pipeline.js"
 
 function recurse( prox){
-	return prox&& recurse( prox.parent)
+	return prox.parent? recurse( prox.parent): prox
 }
 
 function useParentOptions( parent, extra, { recurse: _recurse= true}= {}){

@@ -2,9 +2,9 @@ import PhasedMiddleware from "phased-middleware"
 import { pluginName} from "phased-middleware/name.js"
 import { $symbols} from "phased-middleware/symbol.js"
 
-import AggroProx from "./plugin/aggro-prox.js"
 import { defaults, defaulter } from "./defaults.js"
 import { PipelineNames, PipelineSymbols} from "./pipeline.js"
+import AggroProx from "./plugin/aggro-prox.js"
 import { $obj, $proxied} from "./symbol.js"
 
 /**
