@@ -33,7 +33,7 @@ tape( "object field gets written", async function( t){
 	  output= prox({},{ plugins}),
 	  writeFsSymbol= output._prox.symbol( plugins.length- 1)
 	// set path
-	output._prox[ writeFsSymbol]= {localPath: testOutputDirectory}
+	output._prox[ writeFsSymbol]= {path: testOutputDirectory}
 	// get needed directory created
 	await ready
 

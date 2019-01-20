@@ -4,21 +4,40 @@ import { $instantiate} from "phased-middleware/symbol.js"
 import { $manager, $pathFor, $serializeOptions} from "../symbol.js"
 import { PipelineSymbol} from "../pipeline.js"
 import ManagerSingleton from "./fs/manager.js"
+import { AggroData, AggroSingleton} from "./aggro.js"
 
-const writeFile= promisify( WriteFile)
+process.on( "uncaughtException", console.error)
+process.on( "unhandledRejection", console.error)
+
+const aggroIterator= AggroData.prototype[ Symbol.iterator]
 
 export class WriteFs{
-	static get phases(){
-		return {
-			postrun: {
-				set: WriteFs.prototype.set
+	static findAggro( prox, symbol, i){
+		// try a symbol
+		if( symbol!== undefined){
+			const data= prox[ symbol]
+			if( data&& data.parent&& data.key){
+				return symbol
+			}
+		}
+		// try a specific index
+		if( i!== undefined){
+			const
+			  symbol= prox.symbol( i),
+			  data= prox[ symbol]
+			if( data&& data.parent&& data.key){
+				return symbol
+			}
+		}
+		// search all plugin data for something with the right shape
+		for( let symbol of prox.symbols){
+			const data= prox[ symbol]
+			if( data&& data.parent&& data.key){
+				return symbol
 			}
 		}
 	}
-	constructor({ manager}={ manager: ManagerSingleton}, cursor){
-		if (!manager&& cursor){
-			manager= cursor.get( $manager)
-		}
+	constructor({ manager, aggro}={ manager: ManagerSingleton, aggro: AggroSingleton}){
 		if( !manager){
 			manager= ManagerSingleton
 		}
@@ -31,55 +50,44 @@ export class WriteFs{
 	set( cursor){
 		const
 		  self= cursor.plugin,
-		  [ target, prop, val ]= cursor.inputs,
-		  t= typeof( val),
-		  path= self.pathFor( target, prop),
+		  [ target, prop, val ]= cursor.inputs
+		if( prop instanceof Symbol){
+			// welp. anyone got any bright ideas?
+			return
+		}
+
+
+		// calculate path for this set
+		const
+		  paths= [ prop],
+		  pluginData= cursor.pluginData,
+		  pluginIterator= pluginData[ Symbol.iterator],
+		  // iterate through parents, either via calling our pluginData iterator, or using aggro's iterator on pluginData.
+		  iter= pluginIterator&& pluginIterator()|| pluginData&& aggroIterator.call( pluginData)
+		for( let aggroData of iter){
+			if( aggroData.path){
+				// this object has a concrete path specified: prepend, & stop iterating.
+				paths.unshift( aggroData.path)
+				break
+			}
+			if( !aggroData.key){
+				// perhaps we should try to loop & make sure this is the end (else throw)?
+				break
+			}
+			paths.unshift( aggroData.key)
+		}
+		// interpolate a leading ~ as the HOME directory
+		if( paths.length&& paths[ 0][ 0]=== "~"&& process.env.HOME){
+			paths[ 0]= paths[ 0].substring( 1)
+			paths.unshift (process.env.HOME)
+		}
+
+		// queue task to serialize out object
+		const
+		  path= resolve( ...paths),
 		  opts= cursor.get( $serializeOptions),
 		  task= ()=> serialize( path, val, opts)
-		if( task){
-			self.manager.push( task)
-		}
-	}
-	pathFor( target, prop){
-		const
-		  paths= [],
-		  rootPath= this.localPath
-		if( rootPath){
-			// this plugin has a specific path set for itself, nothing else required
-			paths.push( rootPath)
-		}else{
-			// otherwise walk prox's getting names until one of them has a localPath
-			// walk up all proxies
-			let walk= target&& target._prox
-			while( walk){
-				if( walk.localPath){
-					paths.unshift( walk.localPath)
-					// localPath means end of iteration:
-					break
-				}
-
-				// add our property name here
-				const parentKey= walk.parentKey
-				if( !parentKey){
-					throw new Error("could not calculate write-fs path")
-				}
-				paths.push( parentKey)
-
-				// walk up
-				walk= walk.parent
-			}
-		}
-
-		// add optional prop
-		if( prop!== undefined){
-			paths.push( prop)
-		}
-
-		// replace ~ with HOME
-		if( paths[ 0]&& paths[0][0]=== "~"&& process.env.HOME){
-			paths[ 0]= process.env.HOME+ paths[0].substr( 1)
-		}
-		return resolve( ...paths)
+		self.manager.push( task)
 	}
 	static get name(){
 		return "write-fs"

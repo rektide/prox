@@ -1,8 +1,24 @@
 import Prox from "../prox"
+import { $aggro} from "../symbol.js"
 import { currentObject, setCurrentObject} from "./_prox.js"
-import { $phases, $plugins, $instantiate} from "phased-middleware/symbol.js"
+import { $install, $phases, $plugins, $instantiate} from "phased-middleware/symbol.js"
 
-export function setAggro({ inputs, phasedMiddleware, setOutput, i, symbol}){
+export class AggroData{
+	constructor( opts){
+		this.key= opts.key
+		this.parent= opts.parent
+		this.parentSymbol= opts.parentSymbol
+	}
+	*[Symbol.iterator](){
+		let cursor= this
+		while( cursor){
+			yield cursor
+			cursor= cursor.parent[ cursor.parentSymbol]
+		}
+	}
+}
+
+export function setAggro({ inputs, plugin, prox: phasedMiddleware, setOutput, i, symbol}){
 	const val= inputs[ 2]
 	// weed out primitives
 	if( !val){
@@ -15,28 +31,26 @@ export function setAggro({ inputs, phasedMiddleware, setOutput, i, symbol}){
 	// 
 	const
 	  [ target, key]= inputs,
-	  parentProx= phasedMiddleware,
 	  oldCurrentObject= currentObject,
-	  existingProx= val._prox
-	if( existingProx&& existingProx.parent=== parentProx&& existingProx.parentKey=== key){
+	  existingProx= val._prox,
+	  existingData= existingProx&& existingProx[ symbol]
+	if( existingData&& existingData.parent=== prox&& existingData.parentKey=== key){
 		// object already has a prox with the correct location information
 		return
 	}else if(existingProx){
-		// OH FRAK fork() is broken here!
-		// oh: currentObject hack. fork() maybe probably has to go?
-		// unwrap obj
 		val= currentObject
 	}
 	const
-	  proxied= phasedMiddleware.fork( val),
+	  proxied= prox.fork( val),
 	  newProx= proxied._prox,
-	  newSymbol= newProx.symbol( i, val)
+	  // this assumes aggro is in the same place. default aggroprox behaves so.
+	  newSymbol= newProx.symbol( i)
 	// assign
-	newProx[ newSymbol]= {
-	  parent: phasedMiddleware,
-	  parentPluginData: symbol,
-	  parentKey: key
-	}
+	newProx[ newSymbol]= new AggroData({
+	  key,
+	  parent: prox,
+	  parentSymbol: symbol
+	})
 	// restore, after having gotten some new _prox's
 	setCurrentObject( oldCurrentObject)
 	
@@ -67,5 +81,5 @@ export const aggro= {
 	set: setAggro,
 	name: "aggro",
 	[ $instantiate]: true
-}
+}, Aggro= aggro, aggroSingleton= aggro, AggroSingleton= aggro, singleton= aggro, Singleton= aggro
 export default aggro

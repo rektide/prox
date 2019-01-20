@@ -5,7 +5,7 @@ import { $symbols} from "phased-middleware/symbol.js"
 import { defaults, defaulter } from "./defaults.js"
 import { PipelineNames, PipelineSymbols} from "./pipeline.js"
 import AggroProx from "./plugin/aggro-prox.js"
-import { $obj, $proxied} from "./symbol.js"
+import { $proxied, $target} from "./symbol.js"
 
 /**
 * prox is a proxy 'handler' instance, pointing to a specific obj

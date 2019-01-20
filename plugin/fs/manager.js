@@ -8,7 +8,7 @@ export class Manager{
 		this.queue= [] // queue of things to run
 	}
 	awaitEmpty(){
-		if( !this.queue.length){
+		if( !this.queue.length&& !this.current){
 			return Promise.resolve( this)
 		}
 		if( !this.empty){
@@ -29,21 +29,24 @@ export class Manager{
 	}
 	dispatch( o= this.queue.pop()){
 		if( !o){
+			// signal to anyone on awaitEmpty
 			if( this.empty){
 				this.empty.resolve()
 				this.empty= null
 			}
+			// terminate
 			return
 		}
 		const val= o()
 		if( val.then){
+			// remember current in-progress task
+			this.current= val
 			// complete async work then go again
 			val.then( this.finish)
-			this.current= val
-			return
+		}else{
+			// sync work complete, go again
+			this.dispatch()
 		}
-		// sync work complete, go again
-		this.dispatch()
 	}
 	finish(){
 		// this promise just wrapped
