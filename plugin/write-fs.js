@@ -4,12 +4,18 @@ import { $instantiate} from "phased-middleware/symbol.js"
 import { $aggro, $manager, $pathFor, $serializeOptions} from "../symbol.js"
 import { PipelineSymbol} from "../pipeline.js"
 import ManagerSingleton from "./fs/manager.js"
-import { AggroData, AggroSingleton} from "./aggro.js"
+import { AggroSingleton} from "./aggro.js"
+import AggroData from "./aggro-data.js"
 
 process.on( "uncaughtException", console.error)
 process.on( "unhandledRejection", console.error)
 
 const AggroIterator= AggroData.prototype[ Symbol.iterator]
+
+export let writeSuppress= false
+export function setWriteSuppress( value){
+	writeSuppress= value
+}
 
 export class WriteFs{
 	static findAggro( prox, symbol, i){
@@ -48,6 +54,9 @@ export class WriteFs{
 	}
 
 	set( cursor){
+		if( writeSuppress){
+			return
+		}
 		const
 		  self= cursor.plugin,
 		  [ target, prop, val ]= cursor.inputs
@@ -59,7 +68,7 @@ export class WriteFs{
 		// find $aggro
 		const
 		  fsData= cursor.pluginData,
-		  paths= fsData&& fsData.path? []: [ prop],
+		  paths= fsData&& [ prop],
 		  gotAggro= cursor.get( $aggro),
 		  aggroSymbol= gotAggro|| WriteFs.findAggro( cursor.phasedMiddleware),
 		  aggroData= cursor.phasedMiddleware[ aggroSymbol],

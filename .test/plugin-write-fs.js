@@ -73,12 +73,12 @@ tape( "deep objects written", async function( t){
 	let files
 	try{
 		files= await Promise.all([
-			readFile( `${testOutputDirectory}${sep}alpha${sep}status`, "utf8"),
-			readFile( `${testOutputDirectory}${sep}omega${sep}status`, "utf8")
+			readFile( `${testOutputDirectory}${sep}payload${sep}alpha${sep}status`, "utf8"),
+			readFile( `${testOutputDirectory}${sep}payload${sep}omega${sep}status`, "utf8")
 		])
 	}catch{}
-	t.equal( files[0], "begin", "alpha status is begin")
-	t.equal( files[1], "end", "omega status is end")
+	t.equal( files&& files[0], "begin", "alpha status is begin")
+	t.equal( files&& files[1], "end", "omega status is end")
 	t.end()
 })
 

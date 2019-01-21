@@ -2,21 +2,9 @@ import Prox from "../prox"
 import { $aggro} from "../symbol.js"
 import { currentObject, setCurrentObject} from "./_prox.js"
 import { $install, $phases, $plugins, $instantiate} from "phased-middleware/symbol.js"
+import AggroData from "./aggro-data.js"
+import { writeSuppress, setWriteSuppress} from "./write-fs.js"
 
-export class AggroData{
-	constructor( opts){
-		this.key= opts.key
-		this.parent= opts.parent
-		this.parentSymbol= opts.parentSymbol
-	}
-	*[Symbol.iterator](){
-		let iter= this
-		while( iter){
-			yield iter
-			iter= iter.parent[ iter.parentSymbol] // parent's iter
-		}
-	}
-}
 
 export function setAggro({ i, inputs, plugin, phasedMiddleware: prox, setOutput, symbol}){
 	const val= inputs[ 2]
@@ -38,6 +26,7 @@ export function setAggro({ i, inputs, plugin, phasedMiddleware: prox, setOutput,
 		// object already has a prox with the correct location information
 		return
 	}else if(existingProx){
+		// get the underlying object via currentObject hack
 		val= currentObject
 	}
 	const
@@ -66,9 +55,12 @@ export function setAggro({ i, inputs, plugin, phasedMiddleware: prox, setOutput,
 
 	// recurse, which will also recurse
 	// for now, only doing a shallow pass via `in`
+	const oldWriteSuppress= writeSuppress
+	setWriteSuppress( true)
 	for( let o in val){
 		proxied[ o]= val[ o]
 	}
+	setWriteSuppress( oldWriteSuppress)
 }
 setAggro[ $phases]= {pipeline: "set", phase: "prerun"}
 
