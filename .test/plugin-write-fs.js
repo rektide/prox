@@ -54,7 +54,7 @@ tape( "object field gets written", async function( t){
 })
 
 tape( "deep objects written", async function( t){
-	t.plan( 2)
+	t.plan( 3)
 	const
 	  plugins= [ ...defaultPlugins, aggro, writeFs],
 	  output= prox({},{ plugins}),
@@ -66,6 +66,7 @@ tape( "deep objects written", async function( t){
 
 	// write our value, queueing fs work
 	output.payload= {alpha: {status: "begin"}, omega: {status: "end"}}
+	output.payload.gamma = { status: "middle" }
 	// wait for manager work queue to drain
 	await ManagerSingleton.awaitEmpty()
 
@@ -74,11 +75,13 @@ tape( "deep objects written", async function( t){
 	try{
 		files= await Promise.all([
 			readFile( `${testOutputDirectory}${sep}payload${sep}alpha${sep}status`, "utf8"),
-			readFile( `${testOutputDirectory}${sep}payload${sep}omega${sep}status`, "utf8")
+			readFile( `${testOutputDirectory}${sep}payload${sep}omega${sep}status`, "utf8"),
+			readFile( `${testOutputDirectory}${sep}payload${sep}gamma${sep}status`, "utf8")
 		])
 	}catch{}
 	t.equal( files&& files[0], "begin", "alpha status is begin")
 	t.equal( files&& files[1], "end", "omega status is end")
+	t.equal( files&& files[2], "middle", "gamma status is middle")
 	t.end()
 })
 

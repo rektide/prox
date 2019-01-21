@@ -68,7 +68,7 @@ export class WriteFs{
 		// find $aggro
 		const
 		  fsData= cursor.pluginData,
-		  paths= fsData&& [ prop],
+		  paths= [ prop],
 		  gotAggro= cursor.get( $aggro),
 		  aggroSymbol= gotAggro|| WriteFs.findAggro( cursor.phasedMiddleware),
 		  aggroData= cursor.phasedMiddleware[ aggroSymbol],
