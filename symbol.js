@@ -3,12 +3,12 @@ export const
   fork= Symbol.for( "prox:fork"),
   Fork= fork,
   $fork= fork,
-  obj= Symbol.for( "prox:obj"),
-  Obj= obj,
-  $obj= obj,
   proxied= Symbol.for( "prox:proxied"),
   Proxied= proxied,
-  $proxied= proxied
+  $proxied= proxied,
+  target= Symbol.for( "prox:target"),
+  Target= target,
+  $target= target
 
 // plugin/write-fs.js
 export const
@@ -27,6 +27,9 @@ export const
 
 // plugin/aggro
 export const
+  aggro= Symbol.for( "prox:aggro"),
+  Aggro= aggro,
+  $aggro= aggro,
   parent= Symbol.for( "prox:aggro:parent"),
   Parent= parent,
   $parent= parent
