@@ -10,15 +10,15 @@ export class AggroData{
 		this.parentSymbol= opts.parentSymbol
 	}
 	*[Symbol.iterator](){
-		let cursor= this
-		while( cursor){
-			yield cursor
-			cursor= cursor.parent[ cursor.parentSymbol]
+		let iter= this
+		while( iter){
+			yield iter
+			iter= iter.parent[ iter.parentSymbol] // parent's iter
 		}
 	}
 }
 
-export function setAggro({ inputs, plugin, prox: phasedMiddleware, setOutput, i, symbol}){
+export function setAggro({ i, inputs, plugin, phasedMiddleware: prox, setOutput, symbol}){
 	const val= inputs[ 2]
 	// weed out primitives
 	if( !val){
