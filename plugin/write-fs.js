@@ -61,11 +61,11 @@ export class WriteFs{
 		  fsData= cursor.pluginData,
 		  paths= fsData&& fsData.path? []: [ prop],
 		  gotAggro= cursor.get( $aggro),
-		  aggroSymbol= gotAggro|| WriteFs.findAggro( cursor.phasedMiddleware, cursor.symbol, cursor.i),
+		  aggroSymbol= gotAggro|| WriteFs.findAggro( cursor.phasedMiddleware),
 		  aggroData= cursor.phasedMiddleware[ aggroSymbol],
 		  aggroIter= aggroData&& aggroData[ Symbol.iterator],
 		  // iterate through parents, either via calling our pluginData iterator, or using aggro's iterator on pluginData.
-		  iter= aggroIter&& aggroIter()|| aggroData&& AggroIterator.call( aggroData)
+		  iter= aggroIter&& aggroIter()|| AggroIterator.call( aggroData|| {})
 		if( !gotAggro){
 			if( !fsData){
 				cursor.pluginData= {
@@ -75,20 +75,22 @@ export class WriteFs{
 				cursor.pluginData[ $aggro]= aggroSymbol
 			}
 		}
-		for( let aggroData of iter){
-
-// OK so path is on writeFs
-// but cursor is of aggro
-			if( aggroData.path){
+		let lastProx= cursor.phasedMiddleware
+		for( let iterAggroData of iter){
+			const
+			  iterFsData= lastProx[ cursor.symbol],
+			  path= iterFsData&& iterFsData.path
+			if( path){
 				// this object has a concrete path specified: prepend, & stop iterating.
-				paths.unshift( aggroData.path)
+				paths.unshift( path)
 				break
 			}
-			if( !aggroData.key){
+			if( !iterAggroData.key){
 				// perhaps we should try to loop & make sure this is the end (else throw)?
 				break
 			}
-			paths.unshift( aggroData.key)
+			paths.unshift( iterAggroData.key)
+			lastProx= iterAggroData.parent
 		}
 		// interpolate a leading ~ as the HOME directory
 		if( paths.length&& paths[ 0][ 0]=== "~"&& process.env.HOME){

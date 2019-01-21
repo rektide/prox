@@ -45,7 +45,10 @@ tape( "object field gets written", async function( t){
 	await ManagerSingleton.awaitEmpty()
 
 	// read file results
-	const file= await readFile( `${testOutputDirectory}${sep}n`, "utf8")
+	let file
+	try{
+		file= await readFile( `${testOutputDirectory}${sep}n`, "utf8")
+	}catch{}
 	t.equal( file, "2", "the `n` file was created as 2")
 	t.end()
 })
@@ -67,10 +70,13 @@ tape( "deep objects written", async function( t){
 	await ManagerSingleton.awaitEmpty()
 
 	// read file results
-	const files= await Promise.all([
-		readFile( `${testOutputDirectory}${sep}alpha${sep}status`, "utf8"),
-		readFile( `${testOutputDirectory}${sep}omega${sep}status`, "utf8")
-	])
+	let files
+	try{
+		files= await Promise.all([
+			readFile( `${testOutputDirectory}${sep}alpha${sep}status`, "utf8"),
+			readFile( `${testOutputDirectory}${sep}omega${sep}status`, "utf8")
+		])
+	}catch{}
 	t.equal( files[0], "begin", "alpha status is begin")
 	t.equal( files[1], "end", "omega status is end")
 	t.end()
