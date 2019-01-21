@@ -1,7 +1,7 @@
 import { resolve } from "path"
 import serialize from "caminus/serialize.js"
 import { $instantiate} from "phased-middleware/symbol.js"
-import { $manager, $pathFor, $serializeOptions} from "../symbol.js"
+import { $aggro, $manager, $pathFor, $serializeOptions} from "../symbol.js"
 import { PipelineSymbol} from "../pipeline.js"
 import ManagerSingleton from "./fs/manager.js"
 import { AggroData, AggroSingleton} from "./aggro.js"
@@ -9,7 +9,7 @@ import { AggroData, AggroSingleton} from "./aggro.js"
 process.on( "uncaughtException", console.error)
 process.on( "unhandledRejection", console.error)
 
-const aggroIterator= AggroData.prototype[ Symbol.iterator]
+const AggroIterator= AggroData.prototype[ Symbol.iterator]
 
 export class WriteFs{
 	static findAggro( prox, symbol, i){
@@ -56,15 +56,29 @@ export class WriteFs{
 			return
 		}
 
-
-		// calculate path for this set
+		// find $aggro
 		const
-		  paths= [ prop],
-		  pluginData= cursor.pluginData,
-		  pluginIterator= pluginData[ Symbol.iterator],
+		  fsData= cursor.pluginData,
+		  paths= fsData&& fsData.path? []: [ prop],
+		  gotAggro= cursor.get( $aggro),
+		  aggroSymbol= gotAggro|| WriteFs.findAggro( cursor.phasedMiddleware, cursor.symbol, cursor.i),
+		  aggroData= cursor.phasedMiddleware[ aggroSymbol],
+		  aggroIter= aggroData&& aggroData[ Symbol.iterator],
 		  // iterate through parents, either via calling our pluginData iterator, or using aggro's iterator on pluginData.
-		  iter= pluginIterator&& pluginIterator()|| pluginData&& aggroIterator.call( pluginData)
+		  iter= aggroIter&& aggroIter()|| aggroData&& AggroIterator.call( aggroData)
+		if( !gotAggro){
+			if( !fsData){
+				cursor.pluginData= {
+					[$aggro]: aggroSymbol
+				}
+			}else{
+				cursor.pluginData[ $aggro]= aggroSymbol
+			}
+		}
 		for( let aggroData of iter){
+
+// OK so path is on writeFs
+// but cursor is of aggro
 			if( aggroData.path){
 				// this object has a concrete path specified: prepend, & stop iterating.
 				paths.unshift( aggroData.path)

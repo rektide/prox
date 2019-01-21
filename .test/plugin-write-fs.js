@@ -50,6 +50,32 @@ tape( "object field gets written", async function( t){
 	t.end()
 })
 
+tape( "deep objects written", async function( t){
+	t.plan( 2)
+	const
+	  plugins= [ ...defaultPlugins, aggro, writeFs],
+	  output= prox({},{ plugins}),
+	  writeFsSymbol= output._prox.symbol( plugins.length- 1)
+	// set path
+	output._prox[ writeFsSymbol]= {path: testOutputDirectory}
+	// get needed directory created
+	await ready
+
+	// write our value, queueing fs work
+	output.payload= {alpha: {status: "begin"}, omega: {status: "end"}}
+	// wait for manager work queue to drain
+	await ManagerSingleton.awaitEmpty()
+
+	// read file results
+	const files= await Promise.all([
+		readFile( `${testOutputDirectory}${sep}alpha${sep}status`, "utf8"),
+		readFile( `${testOutputDirectory}${sep}omega${sep}status`, "utf8")
+	])
+	t.equal( files[0], "begin", "alpha status is begin")
+	t.equal( files[1], "end", "omega status is end")
+	t.end()
+})
+
 //tape( "array field gets written", function( t){
 //	t.end()
 //})
