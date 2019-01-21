@@ -18,22 +18,28 @@ export class Prox extends PhasedMiddleware{
 		var p= new Prox( obj, opts)
 		return p.proxied
 	}
-	constructor( obj= {}, opts){
+	constructor( target= {}, opts){
 		super( defaulter( opts))
 		// these both strike me as kind of a no-no that could potentially obstruct garbage collection
-		this[ $obj]= obj
-		this[ $proxied]= new Proxy( obj, this)
+		this[ $target]= target
+		this[ $proxied]= new Proxy( target, this)
 	}
-	get obj(){
-		return this[ $obj]
+	get target(){
+		return this[ $targe]
 	}
 	get proxied(){
 		return this[ $proxied]
 	}
 
 	free(){
-		this[ $obj]= null
+		const value= {
+		  prox: this,
+		  target: this.target,
+		  proxied: this.proxied
+		}
+		this[ $target]= null
 		this[ $proxied]= null
+		return value
 	}
 	/**
 	* Return a prox proxy for a new `obj`.
