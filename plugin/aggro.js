@@ -3,7 +3,7 @@ import { $aggro} from "../symbol.js"
 import { currentObject, setCurrentObject} from "./_prox.js"
 import { $install, $phases, $plugins, $instantiate} from "phased-middleware/symbol.js"
 import AggroData from "./aggro-data.js"
-import { writeSuppress, setWriteSuppress} from "./write-fs.js"
+import { writeSuppress, setWriteSuppress} from "./write-fs/write-suppress.js"
 
 
 export function setAggro({ i, inputs, plugin, phasedMiddleware: prox, setOutput, symbol}){

@@ -6,16 +6,13 @@ import { PipelineSymbol} from "../pipeline.js"
 import ManagerSingleton from "./fs/manager.js"
 import { AggroSingleton} from "./aggro.js"
 import AggroData from "./aggro-data.js"
+import { writeSuppress} from "./write-fs/write-suppress.js"
+export { writeSuppress, setWriteSuppress} from "./write-fs/write-suppress.js"
 
 process.on( "uncaughtException", console.error)
 process.on( "unhandledRejection", console.error)
 
 const AggroIterator= AggroData.prototype[ Symbol.iterator]
-
-export let writeSuppress= false
-export function setWriteSuppress( value){
-	writeSuppress= value
-}
 
 export class WriteFs{
 	static findAggro( prox, symbol, i){
