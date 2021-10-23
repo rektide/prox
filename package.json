@@ -18,10 +18,11 @@
 	},
 	"dependencies": {
 		"caminus": "^1.0.0",
-		"phased-middleware": "^1.0.1",
-		"deferrant": "^1.2.2"
+		"deferrant": "^1.2.2",
+		"phased-middleware": "^1.0.1"
 	},
 	"devDependencies": {
+		"desm": "^1.2.0",
 		"rimraf": "^2.6.2",
 		"tape": "^4.9.1"
 	}

@@ -1,3 +1,4 @@
+import desm from "desm"
 import { readFile as ReadFile, unlink as Unlink, mkdir as Mkdir, stat as Stat} from "fs"
 import { sep} from "path"
 import tape from "tape"
@@ -15,7 +16,7 @@ const
   readFile= promisify( ReadFile),
   unlink= promisify( Unlink)
 
-const testOutputDirectory= `${__dirname}${sep}testOutput`
+const testOutputDirectory= `${desm( import.meta.url)}${sep}testOutput`
 
 const ready= (async function(){
 	try{
