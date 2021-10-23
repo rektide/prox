@@ -1,5 +1,5 @@
 import { PipelineNames}  from "../pipeline.js"
-import { default as _reflect } from "../util/reflect"
+import { default as _reflect } from "../util/reflect.js"
 import { $phases} from "phased-middleware/symbol.js"
 
 /**

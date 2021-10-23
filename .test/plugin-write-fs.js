@@ -3,7 +3,7 @@ import { sep} from "path"
 import tape from "tape"
 import { promisify} from "util"
 
-import prox from ".."
+import prox from "../prox.js"
 import { defaultPlugins} from "../defaults.js"
 import aggro from "../plugin/aggro.js"
 import writeFs from "../plugin/write-fs.js"

@@ -1,5 +1,5 @@
 var eventEmitter= require("events").EventEmitter,
-  meta= require("./enhance").meta
+  meta= require("./enhance.js").meta
 
 if(typeof exports === undefined)
 	exports= {}

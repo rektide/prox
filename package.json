@@ -1,10 +1,11 @@
 {
-	"name": "prox",
+	"name": "pr0x",
+	"type": "module",
 	"version": "1.0.0",
 	"description": "middleware for proxies",
 	"main": "prox.js",
 	"scripts": {
-		"test": "node -r esm .test"
+		"test": "node .test"
 	},
 	"repository": {
 		"type": "git",
@@ -21,7 +22,6 @@
 		"deferrant": "^1.2.2"
 	},
 	"devDependencies": {
-		"esm": "^3.1.1",
 		"rimraf": "^2.6.2",
 		"tape": "^4.9.1"
 	}

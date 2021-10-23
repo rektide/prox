@@ -1,4 +1,4 @@
-import { stepState } from "../chain"
+import { stepState } from "../chain.js"
 
 // ["add", "update", "delete", "reconfigure", "setPrototype", "preventExtensions"]
 

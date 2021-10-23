@@ -1,5 +1,5 @@
 import tape from "tape"
-import prox from ".."
+import prox from "../prox.js"
 import aggro from "../plugin/aggro.js"
 import { DefaultPlugins} from "../defaults.js"
 

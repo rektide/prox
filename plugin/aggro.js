@@ -1,4 +1,4 @@
-import Prox from "../prox"
+import Prox from "../prox.js"
 import { $aggro} from "../symbol.js"
 import { currentObject, setCurrentObject} from "./_prox.js"
 import { $install, $phases, $plugins, $instantiate} from "phased-middleware/symbol.js"

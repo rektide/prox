@@ -1,4 +1,4 @@
-var prox= require("../prox").prox
+var prox= require("../prox.js").prox
 
 function existens(o,opts){
 	function existens(o){

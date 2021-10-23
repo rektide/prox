@@ -1,7 +1,7 @@
 // basic functionality tests
-import { } from "./basic"
-import { } from "./fork"
+import { } from "./basic.js"
+import { } from "./fork.js"
 
 // plugin tests
-import { } from "./aggro"
-import { } from "./plugin-write-fs"
+import { } from "./aggro.js"
+import { } from "./plugin-write-fs.js"

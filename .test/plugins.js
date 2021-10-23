@@ -1,6 +1,6 @@
 import tape from "tape"
-import prox from ".."
-import { stepHandlerSymbol, stepStateSymbol } from "../chain"
+import prox from "../prox.js"
+import { stepHandlerSymbol, stepStateSymbol } from "../chain.js"
 
 function doubleOutput( exec){
 	const val= exec.args[2]
